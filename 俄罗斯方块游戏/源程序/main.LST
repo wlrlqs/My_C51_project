@@ -1,0 +1,945 @@
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <REG52.H>
+   2          #include"pic.c"
+   3          #include <intrins.h>
+   4          #define LCD_DATA P2
+   5          #define button_delay 150  //按键延时
+   6          #define button_acceleration 65  //按键加速度阈值
+   7          #define GAME_LOCATION 30
+   8          
+   9          sbit change = P3^4;
+  10          sbit OK = P3^5;
+  11          sbit up = P3^2;
+  12          sbit down = P3^0;
+  13          sbit left = P3^1;
+  14          sbit right = P3^3;
+  15          sbit speaker=P3^6; 
+  16          
+  17          sbit LCD_RS=P1^0;
+  18          sbit LCD_RW=P1^1;
+  19          sbit LCD_E=P1^2;
+  20          sbit LCD_CS2=P1^3;//P1^4;               //右屏选择（左右屏有时候相反）
+  21          sbit LCD_CS1=P1^4;//P1^3;               //左屏选择
+  22          sbit LCD_RST=P3^7;
+  23          
+  24          unsigned int up_reg=button_delay;       //按键up累加器
+  25          unsigned int down_reg=button_delay;     //按键down累加器
+  26          unsigned int left_reg=button_delay;     //按键left累加器
+  27          unsigned int right_reg=button_delay;    //按键right累加器
+  28          unsigned int button_a_reg=button_delay; //按键button_a累加器
+  29          unsigned int button_b_reg=button_delay; //按键button_b累加器
+  30          unsigned int right_acceleration=0;              //按键right加速度寄存器
+  31          unsigned int left_acceleration=0;               //按键left加速度寄存器
+  32          
+  33          unsigned int idata Box_Ram[19];//定义游戏点阵缓存10*16
+  34          unsigned char box_down_reg;//定义方块下落累加寄存器
+  35          unsigned char time0_reg;//定义定时器0累加寄存器
+  36          unsigned char next_mode;//定义下一个方块的类型
+  37          unsigned char next_shape;//定义下一个方块的形状
+  38          unsigned int destroy_row_num=0;//定义所消的行数
+  39          unsigned char speed_num=0;//定义游戏速度等级
+  40          unsigned char level_num;//定义游戏难度等级
+  41          bit game_over_flag;//游戏结束标志位置0表示游戏未结束
+  42          bit pause_game_flag;//游戏暂停标志位置0表示游戏未暂停
+  43          
+  44          struct
+  45          {
+  46                  unsigned char mode;//类型
+  47                  unsigned char shape;//形状
+  48                  unsigned char x;//x坐标
+  49                  unsigned char y;//y坐标
+  50                  unsigned int box;//定义方块缓存
+  51          }s_box; //定义方块结构体
+  52          //LCD检测忙状态函数
+  53          void LCD_check_busy()
+  54          {
+  55   1              unsigned char temp;
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 2   
+
+  56   1              LCD_RS=0;
+  57   1              LCD_RW=1;
+  58   1              do
+  59   1              {
+  60   2                      LCD_DATA=0xff;
+  61   2                      LCD_E=1;
+  62   2                      temp=LCD_DATA;
+  63   2                      LCD_E=0;
+  64   2              }while((temp&0x80)==0x80);              
+  65   1      }
+  66          //写指令代码（cs为0选左屏，cs为1选右屏）
+  67          void LCD_W_code(unsigned char tpcode,bit cs)
+  68          {
+  69   1              LCD_RS=0;
+  70   1              LCD_RW=0;
+  71   1              LCD_CS2=~cs;
+  72   1              LCD_CS1=cs;
+  73   1              LCD_DATA=tpcode;
+  74   1              LCD_E=1;
+  75   1              _nop_();
+  76   1              LCD_E=0;
+  77   1      }
+  78          //写显示数据（cs为0选左屏，cs为1选右屏）
+  79          void LCD_W_data(unsigned char tpdata,bit cs)
+  80          {
+  81   1              LCD_check_busy();
+  82   1              LCD_RS=1;
+  83   1              LCD_RW=0;
+  84   1              LCD_CS2=~cs;
+  85   1              LCD_CS1=cs;     
+  86   1              LCD_DATA=tpdata;
+  87   1              LCD_E=1;        
+  88   1              _nop_();
+  89   1              LCD_E=0;
+  90   1      }
+  91          
+  92          //LCD初始化函数
+  93          void LCD_initialize()
+  94          {
+  95   1              LCD_RST=0;
+  96   1              _nop_();
+  97   1              _nop_();
+  98   1              LCD_RST=1;
+  99   1              LCD_W_code(0x3f,0);             //开显示设置    
+ 100   1              LCD_W_code(0xc0,0);             //设置显示起始行为第一行        
+ 101   1              LCD_W_code(0xb8,0);             //页面地址设置  
+ 102   1              LCD_W_code(0x40,0);             //列地址设为0
+ 103   1              LCD_W_code(0x3f,1);
+ 104   1              LCD_W_code(0xc0,1);     
+ 105   1              LCD_W_code(0xb8,1);
+ 106   1              LCD_W_code(0x40,1);
+ 107   1      }
+ 108          //LCD清屏函数
+ 109          void LCD_clear()
+ 110          {
+ 111   1              unsigned char i,j;
+ 112   1              for(j=0;j<8;j++)
+ 113   1              {
+ 114   2                      LCD_W_code(0xb8+j,0);
+ 115   2                      LCD_W_code(0x40,0);
+ 116   2                      LCD_W_code(0xb8+j,1);
+ 117   2                      LCD_W_code(0x40,1);
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 3   
+
+ 118   2                      for(i=0;i<64;i++)
+ 119   2                              {       
+ 120   3                                      LCD_W_data(0x00,0);     
+ 121   3                                      LCD_W_data(0x00,1);
+ 122   3                              }
+ 123   2              }
+ 124   1      }
+ 125          //LCD显示字符串函数（word表示要显示的字符串,
+ 126           //length表示要显示的字符串宽度,
+ 127           //x表示首字符所在行数,
+ 128           //y表示首字符所在列数）
+ 129          void LCD_display_word(unsigned char word[],
+ 130                                unsigned int length,
+ 131                                                    unsigned char x,
+ 132                                                    unsigned char y)
+ 133          {
+ 134   1              unsigned char i;
+ 135   1              for(i=0;i<length;i++)
+ 136   1              {
+ 137   2                      
+ 138   2                      LCD_W_code(0xb8+x,0);
+ 139   2                      LCD_W_code(0xb8+x,1);
+ 140   2                      if(y+i<64)
+ 141   2                      {
+ 142   3                              LCD_W_code(0x40+y+i,0); 
+ 143   3                              LCD_W_data(word[i],0);
+ 144   3                      }
+ 145   2                      else
+ 146   2                      {
+ 147   3                              LCD_W_code(y+i,1);      
+ 148   3                              LCD_W_data(word[i],1);
+ 149   3                      }
+ 150   2              }
+ 151   1      }
+ 152          //LCD画全屏函数
+ 153          void LCD_full_draw(unsigned char word[])
+ 154          {
+ 155   1              unsigned char i,j;
+ 156   1              for(i=0;i<8;i++)
+ 157   1              {
+ 158   2                      LCD_W_code(0xb8+i,0);
+ 159   2                      LCD_W_code(0x40,0);     
+ 160   2                      for(j=0;j<64;j++)
+ 161   2                      {
+ 162   3                              LCD_W_data(word[i*128+j],0);
+ 163   3                      }
+ 164   2                      LCD_W_code(0xb8+i,1);
+ 165   2                      LCD_W_code(0x40,1);     
+ 166   2                      for(j=0;j<64;j++)
+ 167   2                      {
+ 168   3                              LCD_W_data(word[i*128+64+j],1);
+ 169   3                      }                       
+ 170   2              }
+ 171   1      }
+ 172          //LCD显示一个字节函数（
+ 173            //x表示x坐标,
+ 174            //y表示y坐标,
+ 175            //tpdata表示要显示的数据）
+ 176          void LCD_display_byte(unsigned char x,
+ 177                                                    unsigned char y,
+ 178                                                    unsigned char tpdata)
+ 179          {
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 4   
+
+ 180   1              if(x<64)
+ 181   1              {
+ 182   2                      LCD_W_code(0xb8+y,0);
+ 183   2                      LCD_W_code(0x40+x,0);
+ 184   2                      LCD_W_data(tpdata,0);   
+ 185   2              }
+ 186   1              else
+ 187   1              {
+ 188   2                      LCD_W_code(0xb8+y,1);
+ 189   2                      LCD_W_code(x,1);
+ 190   2                      LCD_W_data(tpdata,1);   
+ 191   2              }
+ 192   1      } 
+ 193          
+ 194          void LCD_draw(unsigned char word[])
+ 195          {
+ 196   1        unsigned char i,j;
+ 197   1        for(i=0;i<8;i++)
+ 198   1        {
+ 199   2          LCD_W_code(0xb8+i,1);
+ 200   2              LCD_W_code(0x40+20,1);
+ 201   2              for(j=0;j<44;j++)
+ 202   2              {
+ 203   3                LCD_W_data(word[i*44+j],1);
+ 204   3              }
+ 205   2        }
+ 206   1      }
+ 207          //基本界面显示函数
+ 208          void display_basic()
+ 209          {
+ 210   1              unsigned char i;
+ 211   1              for(i=0;i<8;i++)
+ 212   1              {
+ 213   2                      LCD_display_byte(GAME_LOCATION,i,0xff);
+ 214   2                      LCD_display_byte(GAME_LOCATION+41,i,0xff);
+ 215   2              }
+ 216   1      }
+ 217          //刷新游戏区域函数
+ 218          void refurbish_display()
+ 219          {
+ 220   1              unsigned char i,j,tpdata;
+ 221   1              for(i=0;i<8;i++)
+ 222   1              {
+ 223   2                      for(j=0;j<10;j++)
+ 224   2                      {
+ 225   3                              tpdata=0x00;
+ 226   3                              if(  (Box_Ram[2*i]>>(12-j))&0x0001==1  )
+ 227   3                              {
+ 228   4                                      tpdata=0x0f;
+ 229   4                              }
+ 230   3                              if(  (Box_Ram[2*i+1]>>(12-j))&0x0001==1  )
+ 231   3                              {
+ 232   4                                      tpdata|=0xf0;
+ 233   4                              }
+ 234   3                              LCD_display_byte(GAME_LOCATION+1+j*4,i,tpdata);
+ 235   3                              LCD_display_byte(GAME_LOCATION+2+j*4,i,0xbb&tpdata);
+ 236   3                              LCD_display_byte(GAME_LOCATION+3+j*4,i,0xdd&tpdata);
+ 237   3                              LCD_display_byte(GAME_LOCATION+4+j*4,i,tpdata);
+ 238   3                      }
+ 239   2              }
+ 240   1      }
+ 241          //基本按键程序(返回0表示没按键被按下，返回1表示down被按下，返回2表示up被按下，返回3表示button_a被按下,返回
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 5   
+
+             -4表示left被按下,返回5表示right被按下)
+ 242          //游戏中按键识别程序（有优先级，从高到低依次是button_a_reg>down>left>right>up）
+ 243          unsigned char basic_button()
+ 244          {
+ 245   1              unsigned char tpflag=0;
+ 246   1              if(OK==0)
+ 247   1              {
+ 248   2                  if(button_b_reg<button_delay*8)
+ 249   2                      {
+ 250   3                        button_b_reg++;
+ 251   3                      }
+ 252   2                      else
+ 253   2                      {
+ 254   3                        button_b_reg=0;
+ 255   3                        tpflag=6;
+ 256   3                      }
+ 257   2              }
+ 258   1              else
+ 259   1              {
+ 260   2                   button_b_reg=button_delay*8;
+ 261   2              }
+ 262   1              if(down==0)
+ 263   1              {
+ 264   2                      if(down_reg<button_delay)//按键一直被按下时设置时间间隔触发
+ 265   2                      {
+ 266   3                              down_reg++;
+ 267   3                      }
+ 268   2                      else
+ 269   2                      {
+ 270   3                              down_reg=0;
+ 271   3                              tpflag=1;//返回1表示down被按下
+ 272   3                      }               
+ 273   2              }
+ 274   1              else
+ 275   1              {
+ 276   2                      down_reg=button_delay;//释放按键时置按键缓存为button_delay，以便在下次按键时及时响应
+ 277   2              }
+ 278   1              if(up==0)
+ 279   1              {
+ 280   2                      if(up_reg<button_delay)//按键一直被按下时设置时间间隔触发
+ 281   2                      {
+ 282   3                              up_reg++;
+ 283   3                      }
+ 284   2                      else
+ 285   2                      {
+ 286   3                              up_reg=0;
+ 287   3                              tpflag=2;//返回2表示up被按下
+ 288   3                      }               
+ 289   2              }
+ 290   1              else
+ 291   1              {
+ 292   2                      up_reg=button_delay;//释放按键时置按键缓存为button_delay，以便在下次按键时及时响应
+ 293   2              }
+ 294   1              if(change==0)
+ 295   1              {
+ 296   2                      if(button_a_reg<button_delay*8)//按键一直被按下时设置时间间隔触发
+ 297   2                      {
+ 298   3                              button_a_reg++;
+ 299   3                      }
+ 300   2                      else
+ 301   2                      {
+ 302   3                              button_a_reg=0;
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 6   
+
+ 303   3                              tpflag=3;//返回3表示button_a被按下
+ 304   3                      }               
+ 305   2              }
+ 306   1              else
+ 307   1              {
+ 308   2                      button_a_reg=button_delay*8;//释放按键时置按键缓存为button_delay，以便在下次按键时及时响应
+ 309   2              }
+ 310   1              if(left==0)
+ 311   1              {
+ 312   2                      if(left_reg<(button_delay))//按键一直被按下时设置时间间隔触发
+ 313   2                      {
+ 314   3                              left_reg++;
+ 315   3                      }
+ 316   2                      else
+ 317   2                      {
+ 318   3                              left_reg=left_acceleration*button_acceleration;
+ 319   3                              if(left_acceleration<2)left_acceleration++;
+ 320   3                              tpflag=4;//返回4表示left被按下
+ 321   3                      }               
+ 322   2              }
+ 323   1              else
+ 324   1              {
+ 325   2                      left_acceleration=0;
+ 326   2                      left_reg=button_delay;//释放按键时置按键缓存为button_delay，以便在下次按键时及时响应
+ 327   2              }
+ 328   1              if(right==0)
+ 329   1              {
+ 330   2                      if(right_reg<(button_delay))//按键一直被按下时设置时间间隔触发
+ 331   2                      {
+ 332   3                              right_reg++;
+ 333   3                      }
+ 334   2                      else
+ 335   2                      {
+ 336   3                              right_reg=right_acceleration*button_acceleration;
+ 337   3                              if(right_acceleration<2)right_acceleration++;
+ 338   3                              tpflag=5;//返回5表示right被按下
+ 339   3                      }               
+ 340   2              }
+ 341   1              else
+ 342   1              {
+ 343   2                      right_acceleration=0;
+ 344   2                      right_reg=button_delay;//释放按键时置按键缓存为button_delay，以便在下次按键时及时响应
+ 345   2              }
+ 346   1              return(tpflag);
+ 347   1      }
+ 348          //检查覆盖函数（检查此时带入的参数所确定的方块是否会覆盖原有图形，不会覆盖返回1，覆盖返回0）
+ 349          bit check_cover(unsigned char tpx,unsigned char tpy,unsigned int tpbox)
+ 350          {
+ 351   1              unsigned char i;
+ 352   1              bit tpflag=1;
+ 353   1              unsigned int temp;
+ 354   1              temp=s_box.box;
+ 355   1              for(i=0;i<4;i++)
+ 356   1              {
+ 357   2                      Box_Ram[3-i+s_box.y]&=(~((temp&0x000f)<<(9-s_box.x))); 
+ 358   2                      temp=temp>>4;
+ 359   2              }//先将现有的方块从游戏点阵缓存中删除
+ 360   1              temp=tpbox;
+ 361   1              for(i=0;i<4;i++)
+ 362   1              {
+ 363   2                      if((((temp&0x000f)<<(9-tpx))&Box_Ram[3-i+tpy])!=0x0000)
+ 364   2                      {
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 7   
+
+ 365   3                              tpflag=0;
+ 366   3                      }
+ 367   2                      temp=temp>>4;
+ 368   2              }//检查方块是否和原有图形重叠,重叠置标志位tpflag为0,不重叠不置标志位，即tpflag为1
+ 369   1              temp=s_box.box;
+ 370   1              for(i=0;i<4;i++)
+ 371   1              {
+ 372   2                      Box_Ram[3-i+s_box.y]|=((temp&0x000f)<<(9-s_box.x));
+ 373   2                      temp=temp>>4;
+ 374   2              }//在游戏点阵缓存中恢复原有方块
+ 375   1              return(tpflag);
+ 376   1      }
+ 377          //方块缓存数据函数（输入方块类型和形状即可获得方块缓存数据）
+ 378          unsigned int box_read_data(unsigned char tpmode,unsigned char tpshape)
+ 379          {
+ 380   1              unsigned int tpbox;
+ 381   1              switch(tpmode)
+ 382   1              {
+ 383   2                      case 0: switch(tpshape)
+ 384   2                                      {
+ 385   3                                              case 0: tpbox=0xf000;break;
+ 386   3                                              case 1: tpbox=0x4444;break;
+ 387   3                                              case 2: tpbox=0xf000;break;
+ 388   3                                              case 3: tpbox=0x4444;break;
+ 389   3                                              default:;
+ 390   3                                      }break; 
+ 391   2                      case 1: switch(tpshape)
+ 392   2                                      {
+ 393   3                                              case 0: tpbox=0xe800;break;
+ 394   3                                              case 1: tpbox=0xc440;break;
+ 395   3                                              case 2: tpbox=0x2e00;break;
+ 396   3                                              case 3: tpbox=0x88c0;break;
+ 397   3                                              default:;
+ 398   3                                      }break; 
+ 399   2                      case 2: switch(tpshape)
+ 400   2                                      {
+ 401   3                                              case 0: tpbox=0xe200;break;
+ 402   3                                              case 1: tpbox=0x44c0;break;
+ 403   3                                              case 2: tpbox=0x8e00;break;
+ 404   3                                              case 3: tpbox=0xc880;break;
+ 405   3                                              default:;
+ 406   3                                      }break; 
+ 407   2                      case 3: switch(tpshape)
+ 408   2                                      {
+ 409   3                                              case 0: tpbox=0xcc00;break;
+ 410   3                                              case 1: tpbox=0xcc00;break;
+ 411   3                                              case 2: tpbox=0xcc00;break;
+ 412   3                                              case 3: tpbox=0xcc00;break;
+ 413   3                                              default:;
+ 414   3                                      }break; 
+ 415   2                      case 4: switch(tpshape)
+ 416   2                                      {
+ 417   3                                              case 0: tpbox=0xc600;break;
+ 418   3                                              case 1: tpbox=0x4c80;break;
+ 419   3                                              case 2: tpbox=0xc600;break;
+ 420   3                                              case 3: tpbox=0x4c80;break;
+ 421   3                                              default:;
+ 422   3                                      }break; 
+ 423   2                      case 5: switch(tpshape)
+ 424   2                                      {
+ 425   3                                              case 0: tpbox=0x6c00;break;
+ 426   3                                              case 1: tpbox=0x8c40;break;
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 8   
+
+ 427   3                                              case 2: tpbox=0x6c00;break;
+ 428   3                                              case 3: tpbox=0x8c40;break;
+ 429   3                                              default:;
+ 430   3                                      }break;
+ 431   2                      case 6: switch(tpshape)
+ 432   2                                      {
+ 433   3                                              case 0: tpbox=0x4e00;break;
+ 434   3                                              case 1: tpbox=0x8c80;break;
+ 435   3                                              case 2: tpbox=0xe400;break;
+ 436   3                                              case 3: tpbox=0x4c40;break;
+ 437   3                                              default:;
+ 438   3                                      }break;
+ 439   2                      default:;
+ 440   2              }
+ 441   1              return(tpbox);
+ 442   1      }
+ 443          //方块载入函数
+ 444          void box_load()
+ 445          {
+ 446   1              s_box.box=box_read_data(s_box.mode,s_box.shape);
+ 447   1      }
+ 448          //方块映射游戏点阵缓存函数（参数是原来方块的位置、缓存，先消去原有位置的方块）
+ 449          void box_to_Box_Ram(unsigned char tpx,unsigned char tpy,unsigned int tpbox)
+ 450          {
+ 451   1              unsigned char i;
+ 452   1              unsigned int temp;
+ 453   1              temp=tpbox;
+ 454   1              for(i=0;i<4;i++)
+ 455   1              {
+ 456   2                      Box_Ram[3-i+tpy]=Box_Ram[3-i+tpy]&(~((temp&0x000f)<<(9-tpx))); 
+ 457   2                      temp=temp>>4;
+ 458   2              }//从游戏点阵缓存中删除以前的方块
+ 459   1              temp=s_box.box;
+ 460   1              for(i=0;i<4;i++)
+ 461   1              {
+ 462   2                      Box_Ram[3-i+s_box.y]=((temp&0x000f)<<(9-s_box.x))|Box_Ram[3-i+s_box.y];
+ 463   2                      temp=temp>>4;
+ 464   2              }//在游戏点阵缓存中加入新的方块
+ 465   1      }
+ 466          //显示数字函数（
+ 467            //x表示x坐标,
+ 468            //y表示y坐标,
+ 469            //tpdata表示要显示的数字）
+ 470          //显示速度函数
+ 471          void show_num(unsigned char x,
+ 472                                                    unsigned char y,
+ 473                                                    unsigned char tpdata)
+ 474          {
+ 475   1              unsigned char i;
+ 476   1              for(i=0;i<4;i++)
+ 477   1              {
+ 478   2                      LCD_display_byte(x+i,y,num_data[tpdata*4+i]);   
+ 479   2              }
+ 480   1      } 
+ 481          void show_speed_num(unsigned char x,unsigned char y)
+ 482          {
+ 483   1              show_num(x,y,speed_num);
+ 484   1      }
+ 485          //显示得分函数
+ 486          void show_score_num(unsigned char x,unsigned char y)
+ 487          {
+ 488   1              show_num(x,y,destroy_row_num/10000);
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 9   
+
+ 489   1              show_num(x+=5,y,(destroy_row_num%10000)/1000);
+ 490   1              show_num(x+=5,y,(destroy_row_num%1000)/100);
+ 491   1              show_num(x+=5,y,(destroy_row_num%100)/10);
+ 492   1              show_num(x+=5,y,destroy_row_num%10);
+ 493   1      }
+ 494          //消行函数
+ 495          void destroy_row()
+ 496          {
+ 497   1              unsigned char i,j=0;
+ 498   1              unsigned char tpflag[4]={0,0,0,0};//最多一次只能消四行，所以设置四个标志位即可,初值为0
+ 499   1              for(i=0;i<16;i++)
+ 500   1              {
+ 501   2                      if((Box_Ram[i]&0x3ffc)==0x3ffc)
+ 502   2                      {
+ 503   3                              tpflag[j]=i+1;//tpflag为0表示不标志，1表示第0行缓存为0xffff，n表示第n+1行缓存为0xffff
+ 504   3                              destroy_row_num++;//消除的行数加一
+ 505   3                              /*如不把Box_Ram[19]定义成idata类型的话加入这段代码显示数据区就溢出了*/
+ 506   3                              if(destroy_row_num%30==0&&speed_num!=9)
+ 507   3                              {
+ 508   4                                      speed_num++;//消够三十行游戏速度加一
+ 509   4                                      show_speed_num(13,4);//调用显示游戏速度函数
+ 510   4                              }
+ 511   3                              /*如不把Box_Ram[19]定义成idata类型的话加入这段代码显示数据区就溢出了*/
+ 512   3                              j++;
+ 513   3                              if(j==4)
+ 514   3                              {
+ 515   4                                      break;
+ 516   4                              }//检查完有四行要消除则退出检查循环
+ 517   3                      }
+ 518   2              }//依次检测是否有行缓存为0xffff，如果是则标志tpflag为此行的行号
+ 519   1              for(j=0;j<4;j++)
+ 520   1              {
+ 521   2                      if(tpflag[j]!=0)
+ 522   2                      {
+ 523   3                              for(i=tpflag[j]-1;i>0;i--)
+ 524   3                              {
+ 525   4                              Box_Ram[i]=Box_Ram[i-1];
+ 526   4                              Box_Ram[0]=0x2004;
+ 527   4                              }
+ 528   3                      }
+ 529   2              }//被标志的行依次被上一行所取代，即被消去
+ 530   1              show_score_num(3,1);
+ 531   1      }
+ 532          //显示下一个方块函数
+ 533          void show_next_box()
+ 534          {
+ 535   1              unsigned char i,tpdata;
+ 536   1              unsigned int temp;
+ 537   1              temp=box_read_data(next_mode,next_shape);
+ 538   1              for(i=0;i<4;i++)
+ 539   1              {
+ 540   2                      tpdata=0x00;
+ 541   2                      if(  ((temp>>(15-i))&0x0001)==1  )
+ 542   2                      {
+ 543   3                              tpdata=0x0f;
+ 544   3                      }
+ 545   2                      if(  ((temp>>(11-i))&0x0001)==1  )
+ 546   2                      {
+ 547   3                              tpdata|=0xf0;
+ 548   3                      }
+ 549   2                      LCD_display_byte(7+i*4,6,tpdata);
+ 550   2                      LCD_display_byte(8+i*4,6,0xbb&tpdata);
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 10  
+
+ 551   2                      LCD_display_byte(9+i*4,6,0xdd&tpdata);
+ 552   2                      LCD_display_byte(10+i*4,6,tpdata);      
+ 553   2                      tpdata=0x00;
+ 554   2                      if(  ((temp>>(7-i))&0x0001)==1  )
+ 555   2                      {
+ 556   3                              tpdata=0x0f;
+ 557   3                      }
+ 558   2                      if(  ((temp>>(3-i))&0x0001)==1  )
+ 559   2                      {
+ 560   3                              tpdata|=0xf0;
+ 561   3                      }
+ 562   2                      LCD_display_byte(7+i*4,7,tpdata);
+ 563   2                      LCD_display_byte(8+i*4,7,0xbb&tpdata);
+ 564   2                      LCD_display_byte(9+i*4,7,0xdd&tpdata);
+ 565   2                      LCD_display_byte(10+i*4,7,tpdata);              
+ 566   2              }
+ 567   1      }
+ 568          //方块生成函数
+ 569          void box_build()
+ 570          {
+ 571   1              s_box.mode=next_mode;
+ 572   1              s_box.shape=next_shape;
+ 573   1              s_box.x=3;
+ 574   1              s_box.y=0;
+ 575   1              next_mode=TL0%7;//产生随机数，但是是伪随机的
+ 576   1              next_shape=TL0%4;//产生随机数，但是是伪随机的
+ 577   1              show_next_box();//放到game_execute()函数中不知道为什么就是不正常显示(2015注释：程序可能重入了)
+ 578   1      }
+ 579          void game_button()
+ 580          {
+ 581   1              
+ 582   1          switch(basic_button())
+ 583   1          {
+ 584   2              case 3: if(s_box.y!=0)//3表示button_a被按下
+ 585   2                      {
+ 586   3                          EA=0;//关中断，如果不关的话可能引起游戏显示混乱
+ 587   3                          speaker=0;
+ 588   3                          if(s_box.shape==3&&check_cover(s_box.x,s_box.y,box_read_data(s_box.mode,0)))
+ 589   3                          {
+ 590   4                                                              
+ 591   4                              s_box.shape=0;
+ 592   4                              box_load();
+ 593   4                              box_to_Box_Ram(s_box.x,s_box.y,box_read_data(s_box.mode,3));
+ 594   4                          }
+ 595   3                          else if(check_cover(s_box.x,s_box.y,box_read_data(s_box.mode,0)))
+ 596   3                          {   if(check_cover(s_box.x,s_box.y,box_read_data(s_box.mode,s_box.shape+1)))
+ 597   4                                                              {       
+ 598   5                                                                      s_box.shape++;
+ 599   5                                                                      box_load();
+ 600   5                                                                      box_to_Box_Ram(s_box.x,s_box.y,box_read_data(s_box.mode,s_box.shape-1));
+ 601   5                                                              }
+ 602   4                           }
+ 603   3                          EA=1;//开中断
+ 604   3                          speaker=1;
+ 605   3                                              }break;
+ 606   2              case 1: if(s_box.y!=0)//1表示down被按下
+ 607   2              {
+ 608   3                  EA=0;//关中断，如果不关的话可能引起游戏显示混乱
+ 609   3                  speaker=0;
+ 610   3                  while(check_cover(s_box.x,s_box.y+1,s_box.box))//检测是否能下降，指导不能再下降为止
+ 611   3                  {
+ 612   4                      s_box.y++;
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 11  
+
+ 613   4                      box_to_Box_Ram(s_box.x,s_box.y-1,s_box.box);
+ 614   4                  }
+ 615   3                  destroy_row();
+ 616   3                  box_build();
+ 617   3                  box_load();
+ 618   3                                              //      game_over_flag=check_game_over();//游戏结束标志位置1表示游戏结束
+ 619   3                                              //      next_box();
+ 620   3                  box_to_Box_Ram(s_box.x,s_box.y,s_box.box);
+ 621   3                  EA=1;//开中断
+ 622   3                  speaker=1;
+ 623   3                  }break;
+ 624   2              case 4: if(s_box.y!=0)//4表示left被按下
+ 625   2              {
+ 626   3                  EA=0;//关中断，如果不关的话可能引起游戏显示混乱
+ 627   3                  speaker=0;
+ 628   3                  if(check_cover(s_box.x-1,s_box.y,s_box.box))
+ 629   3                  {
+ 630   4                      s_box.x--;
+ 631   4                      box_to_Box_Ram(s_box.x+1,s_box.y,s_box.box);
+ 632   4                  }
+ 633   3                  EA=1;//开中断
+ 634   3                  speaker=1;
+ 635   3              }break;
+ 636   2              case 5: if(s_box.y!=0)//5表示right被按下
+ 637   2                      {
+ 638   3                          EA=0;//关中断，如果不关的话可能引起游戏显示混乱
+ 639   3                          speaker=0;
+ 640   3                          if(check_cover(s_box.x+1,s_box.y,s_box.box))
+ 641   3                          {
+ 642   4                              s_box.x++;
+ 643   4                              box_to_Box_Ram(s_box.x-1,s_box.y,s_box.box);
+ 644   4                          }
+ 645   3                                                      EA=1;//开中断
+ 646   3                                                      speaker=1;
+ 647   3                                              }break;
+ 648   2              case 2: //2表示up被按下
+ 649   2                  speaker=0;
+ 650   2                  pause_game_flag=~pause_game_flag;//游戏暂停标志取反
+ 651   2                  while(up==0);
+ 652   2                  speaker=1;
+ 653   2                  break;
+ 654   2              default:;
+ 655   2          }   
+ 656   1      }
+ 657          //检查游戏结束函数（游戏结束返回1，游戏没有结束返回0）
+ 658          bit check_game_over()
+ 659          {
+ 660   1              unsigned char i;
+ 661   1              bit tpflag=0;
+ 662   1              unsigned int temp;
+ 663   1              temp=s_box.box;
+ 664   1              for(i=0;i<4;i++)
+ 665   1              {
+ 666   2                      if((((temp&0x000f)<<(9-s_box.x))&Box_Ram[3-i+s_box.y])!=0x0000)
+ 667   2                      {
+ 668   3                              tpflag=1;
+ 669   3                      }
+ 670   2                      temp=temp>>4;
+ 671   2              }//检查新建方块是否和原有图形重叠,重叠置标志位tpflag为1,不重叠不置标志位，即tpflag为0
+ 672   1              return(tpflag);
+ 673   1      }
+ 674          //游戏执行函数（控制方块下落，检测是否到底，如果到底调用消行函数）
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 12  
+
+ 675          void game_execute()
+ 676          {
+ 677   1              if(box_down_reg<20-(speed_num<<1))
+ 678   1              {                                 
+ 679   2                      box_down_reg++;
+ 680   2              }
+ 681   1              else
+ 682   1              {
+ 683   2                      box_down_reg=0;
+ 684   2                      if(check_cover(s_box.x,s_box.y+1,s_box.box))
+ 685   2                      {
+ 686   3                              s_box.y++;
+ 687   3                              box_to_Box_Ram(s_box.x,s_box.y-1,s_box.box);
+ 688   3                      }//检测是否还可以下降，如果还能下降则继续下降
+ 689   2                      else
+ 690   2                      {
+ 691   3                              destroy_row();
+ 692   3                              box_build();
+ 693   3                              box_load();
+ 694   3                              game_over_flag=check_game_over();//游戏结束标志位置1表示游戏结束
+ 695   3                              box_to_Box_Ram(s_box.x,s_box.y,s_box.box);
+ 696   3                              box_down_reg=(20-(speed_num<<1)-1);//为了使方块一出现就能变换形状，所以需要尽快使得方块下降一行，不知道
+             -为什么最高行不能变换形状
+ 697   3                      }//如果不能下降则调用消行函数检查是否可以消行，之后重新建立方块
+ 698   2              }       
+ 699   1      }
+ 700          //选择游戏速度函数
+ 701          void select_speed()
+ 702          {
+ 703   1              unsigned char i;
+ 704   1              bit tpflag=1;//置循环标志位为1
+ 705   1              LCD_clear();
+ 706   1              for(i=0;i<128;i++)
+ 707   1              {
+ 708   2                      LCD_display_byte(i,0,0xff);
+ 709   2                      LCD_display_byte(i,7,0xff);
+ 710   2              }
+ 711   1              LCD_display_byte(60,4,0x7f);
+ 712   1              LCD_display_byte(59,4,0x3e);
+ 713   1              LCD_display_byte(58,4,0x1c);
+ 714   1              LCD_display_byte(57,4,0x08);
+ 715   1              LCD_display_byte(67,4,0x7f);
+ 716   1              LCD_display_byte(68,4,0x3e);
+ 717   1              LCD_display_byte(69,4,0x1c);
+ 718   1              LCD_display_byte(70,4,0x08);
+ 719   1              LCD_display_word(speed_data,24,3,52);
+ 720   1              show_speed_num(62,4);
+ 721   1              while(tpflag)
+ 722   1              {
+ 723   2                      switch(basic_button())
+ 724   2                      {
+ 725   3                              case 4: if(speed_num!=0)
+ 726   3                                              {
+ 727   4                                                      speaker=0;
+ 728   4                                                      speed_num--;
+ 729   4                                                      show_speed_num(62,4);
+ 730   4                                                      speaker=1;
+ 731   4                                              }
+ 732   3                                              while(left==0);
+ 733   3                                              break;
+ 734   3                              case 5: if(speed_num!=9)
+ 735   3                                              {
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 13  
+
+ 736   4                                                  speaker=0;
+ 737   4                                                      speed_num++;
+ 738   4                                                      show_speed_num(62,4);
+ 739   4                                                      speaker=1;
+ 740   4                                              }
+ 741   3                                              while(right==0);
+ 742   3                                              break;
+ 743   3                              case 6: tpflag=0;
+ 744   3                                      speaker=0;
+ 745   3                                              while(OK==0);
+ 746   3                                              speaker=1;
+ 747   3                                              break;
+ 748   3                              default:;
+ 749   3                      }
+ 750   2              }//选择游戏速度循环
+ 751   1      }
+ 752          //游戏开始显示画面
+ 753          void game_start_show()
+ 754          {
+ 755   1              bit tpflag=1;//置循环标志位为1
+ 756   1              LCD_full_draw(start_pic);
+ 757   1              while(tpflag)
+ 758   1              {
+ 759   2                      switch(basic_button())
+ 760   2                      {
+ 761   3                              case 6: tpflag=0;
+ 762   3                                      speaker=0;
+ 763   3                                              while(OK==0);
+ 764   3                                              speaker=1;
+ 765   3                                              break;
+ 766   3                              default:;
+ 767   3                      }
+ 768   2              }//game_start_show循环
+ 769   1      }
+ 770          //游戏初始化函数
+ 771          void game_initialize()
+ 772          {
+ 773   1              box_down_reg=0;
+ 774   1              next_mode=6;
+ 775   1              next_shape=2;
+ 776   1              destroy_row_num=0;
+ 777   1              game_over_flag=0;
+ 778   1              pause_game_flag=0;
+ 779   1              LCD_clear();
+ 780   1              time0_reg=0;
+ 781   1              display_basic();        
+ 782   1              LCD_display_word(score_data,24,0,3);
+ 783   1              LCD_display_word(speed_data,24,3,3);
+ 784   1              show_score_num(3,1);
+ 785   1              show_speed_num(13,4);
+ 786   1      }
+ 787          //定时器0初始化函数
+ 788          void time0_initialize()
+ 789          {
+ 790   1              TMOD=0x03;//定时器0，16位工作方式
+ 791   1              TR0=1; //启动定时器
+ 792   1              ET0=1; //打开定时器0中断
+ 793   1                              //默认中断优先级为低
+ 794   1              EA=1; //打开总中断
+ 795   1      }
+ 796          //俄罗斯方块游戏主函数
+ 797          void Tetris_main()
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 14  
+
+ 798          {
+ 799   1              unsigned char i;
+ 800   1              for(i=0;i<19;i++)
+ 801   1              {
+ 802   2                      Box_Ram[i]=Box_Ram_data[i];
+ 803   2              };//载入游戏初始显示画面
+ 804   1              LCD_draw(mpic);
+ 805   1              game_over_flag=0;//游戏结束标志位置0表示游戏未结束
+ 806   1              box_build();
+ 807   1              box_load();
+ 808   1      //      next_box();
+ 809   1              box_to_Box_Ram(s_box.x,s_box.y,s_box.box);
+ 810   1              box_down_reg=(20-(speed_num<<1)-1);//为了使方块一出现就能变换形状，所以需要尽快使得方块下降一行，不知道为
+             -什么最高行不能变换形状
+ 811   1              time0_initialize();
+ 812   1              while(!game_over_flag)//如果游戏结束标志位置1，表示游戏结束，打破循环，调用游戏结束画面显示函数
+ 813   1              {
+ 814   2                      game_button();
+ 815   2              }
+ 816   1              EA=0;//游戏结束后关中断
+ 817   1      }
+ 818          //游戏结束画面显示函数
+ 819          void game_over_show()
+ 820          {
+ 821   1              unsigned char i;
+ 822   1              bit tpflag=1;//置循环标志位为1
+ 823   1              LCD_full_draw(over_pic);
+ 824   1              while(change==0);
+ 825   1              while(tpflag)
+ 826   1              {
+ 827   2                      switch(basic_button())
+ 828   2                      {
+ 829   3                              case 6: tpflag=0;
+ 830   3                                      speaker=0;
+ 831   3                                              while(OK==0);
+ 832   3                                              speaker=1;
+ 833   3                                              break;
+ 834   3                              default:;
+ 835   3                      }
+ 836   2              }//game over画面循环
+ 837   1              LCD_clear();
+ 838   1              for(i=0;i<128;i++)
+ 839   1              {
+ 840   2                      LCD_display_byte(i,0,0xff);
+ 841   2                      LCD_display_byte(i,7,0xff);
+ 842   2              }
+ 843   1              LCD_display_word(score_data,24,3,52);
+ 844   1              show_score_num(52,4);
+ 845   1              tpflag=1;
+ 846   1              while(tpflag)
+ 847   1              {
+ 848   2                      switch(basic_button())
+ 849   2                      {
+ 850   3                              case 6: tpflag=0;
+ 851   3                                      speaker=0;
+ 852   3                                              while(OK==0);
+ 853   3                                              speaker=1;
+ 854   3                                              break;
+ 855   3                              default:;
+ 856   3                      }
+ 857   2              }//游戏得分显示循环
+ 858   1      }
+C51 COMPILER V9.53.0.0   MAIN                                                              05/18/2022 16:09:01 PAGE 15  
+
+ 859          
+ 860          void main()
+ 861          {
+ 862   1              LCD_initialize();
+ 863   1              LCD_clear();
+ 864   1              while(1)
+ 865   1              {
+ 866   2                      game_start_show();
+ 867   2                      select_speed();
+ 868   2                      game_initialize();//调用游戏初始化函数，初始化游戏所有变量以及在液晶屏上显示基本的信息
+ 869   2                      Tetris_main();
+ 870   2                      game_over_show();       
+ 871   2              }       
+ 872   1      }
+ 873          //定时器0中断服务
+ 874          void timer0() interrupt 1
+ 875          {
+ 876   1              TH0=0x00;
+ 877   1              TL0=0x00;
+ 878   1              if(time0_reg<10)
+ 879   1              {                                 
+ 880   2                      time0_reg++;
+ 881   2              }
+ 882   1              else
+ 883   1              {
+ 884   2                      time0_reg=0;
+ 885   2                      if(pause_game_flag==0)
+ 886   2                      {
+ 887   3                              game_execute();
+ 888   3                              refurbish_display();
+ 889   3                      }
+ 890   2              }
+ 891   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   3374    ----
+   CONSTANT SIZE    =   2530    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     30      33
+   IDATA SIZE       =     38    ----
+   BIT SIZE         =      2       7
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

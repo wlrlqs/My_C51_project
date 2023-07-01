@@ -1,0 +1,151 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/30/2023 01:45:46 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE Application\main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT
+                    -(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /****************************************************
+   2          2023ÏÂ°ëÑ§ÄêÐ¡Ñ§ÆÚ
+   3          ¿Î³ÌÉè¼ÆÃû³Æ£º³ö×â³µ¼Æ·ÑÏµÍ³Éè¼Æ
+   4          Ö÷ÒªÈÎÎñÓëÄ¿±ê£ºÉè¼ÆÒ»¿î³ö×â³µ¼Æ·ÑÏµÍ³£¬ÄÜµ÷½ÚÆû³µµÄµ²Î»±ä»¯£¬
+   5                          ¸ù¾Ýµ²Î»µÄ×´Ì¬ÒÔ¼°ÔËÐÐµÄÊ±¼äÀ´½«Àï³ÌÊýÏÔÊ¾µ½µç×ÓÆÁ£¬
+   6                          ¿ØÖÆÁé»î£¬¿É¿¿ÎÈ¶¨£¬Âú×ã¶ÔÏµÍ³µÄ¸÷ÏîÒªÇó¡£Í¬Ê±ÕÆÎÕÓ²¼þµÄº¸½ÓÖÆ×÷£¬
+   7                          Ìá¸ßµçÂ·£¬ÔªÆ÷¼þ²¼¾ÖÄÜÁ¦¡£ÖÆ×÷¿É¹©Êµ¼Ê¼ì²âµÄÊµÎïÑù°å£»Íê³É¿ÎÉèÂÛÎÄ¡£
+   8          Ö÷ÒªÄÚÈÝÓë»ù±¾ÒªÇó£º1¡¢ ÓÃÒ»¸ö¶ÀÁ¢°´¼ü¿ØÖÆÆû³µÇ°½øµµÎ»±ä»¯£¬¸ù¾Ý°´ÏÂ´ÎÊý²»Í¬£¬·Ö±ðÊÇ1µµ¡ú2µµ¡ú3µµ¡ú4µµ¡ú1µ
+             -µ¡­..£¬
+   9                                  µµÎ»²»Í¬ÌåÏÖÔÚÖ±Á÷µç»úµÄ×ªËÙ±ä»¯£¬µµÎ»ÖµÏÔÊ¾ÊýÏÔ¹Ü£»
+  10                              2¡¢ ¸ù¾ÝµµÎ»Öµ£¬ÒÔ¼°ÔËÐÐÊ±ÆÚ£¬ÊµÊ±½«Àï³ÌÊýÏÔÊ¾ÔÚÊýÏÔ¹ÜÉÏ£»
+  11                              3¡¢ ÓÐÔÝ¶¨¹¦ÄÜ£»µ±ÔÝÍ£°´Å¥°´ÏÂ£¬Ö±Á÷µç»úÍ£×ª£¬Àï³ÌÊý¾²Ö¹²»±ä¡£
+  12                              4¡¢ ¾ßÓÐÀï³ÌÇåÁã¹¦ÄÜ£»ÇåÁãÊ±£¬Àï³Ì±íÏÔÊ¾Îª0
+  13                                  ·¢»Ó²¿·ÖÒªÇó£º×ÔÖ÷Éè¼Æ
+  14          µØµã£º5303B
+  15          *****************************************************/
+  16          
+  17          /****************************************************
+  18          ÒÑÓÐ¹¦ÄÜ£º
+  19                    1.´®¿ÚÍ¨ÐÅÒÑÅäÖÃ-12MHz 9600²¨ÌØÂÊ£¬¿ªÆô²¨ÌØÂÊ±¶ËÙ¡£
+  20                    2.ÒÑÅäÖÃTiny¡ªRTOS INT_CLOCK = 1000 cycles£¬Îª12T / ÏµÍ³ÆµÂÊ(12MHz) * 1000 = 1ms
+  21                      ÏµÍ³×îÐ¡ÐÄÌøÖÜÆÚÎª1ms£¬TIMESHARING = 3£¬Ê±¼äÆ¬ÂÖ»»Îª3ms
+  22                      ´ËÅäÖÃÏµÍ³ÀûÓÃÂÊ½Ï¸ß£¬¿ÉÔÚConf_tnyÖÐÅäÖÃ¡£
+  23                    3.RTOSÈÎÎñ·ÖÆµ£¬½µµÍ°´¼ü¼ì²âÈÎÎñÆµÂÊ£¬ÈÎÎñºÏ²¢µÈ£¬Ìá¸ßÏµÍ³×ÊÔ´ÀûÓÃÂÊ¡£
+  24                    4.LEDÁ÷Ë®µÆÏµÍ³£¬»ù´¡ÏÔÊ¾ÒÔ¼°ÔËÐÐÊ±ÏÔÊ¾²½½øµç»úÏàÎ»×´Ì¬¹¦ÄÜ¡¢ÏÔÊ¾µ±Ç°ËÙ¶ÈµµÎ»µÈ¡£
+  25                    5.OLED12864ÆÁÄ»ÅäÖÃ£¬ÏÔÊ¾¸÷ÖÖ½çÃæÒÔ¼°Êý¾ÝË¢ÐÂºÍ°´¼üÌáÊ¾¡£
+  26                    6.µ¥°´¼üÉ¨Ãè¡£
+  27                    7.²½½øµç»úÅäÖÃ£¬loopÑ­»·¼ÆÊý¹¦ÄÜ£¬¿ÉÓÃÓÚÈÎÎñ¿ØÖÆ·ÖÆµ¡£
+  28                    8.ÊÊÅä×ÔÖÆ¿ª·¢°æ¹Ü½Å
+  29          *****************************************************/
+  30          
+  31          /****************************************************
+  32          À´×Ô£ºGUILIN UNIVERSITY OF ELECTRONIC TECHNOLOGY --- EVOLUTION_TEAM --- GUET_ROBOT  
+  33                ¹ðÁÖµç×Ó¿Æ¼¼´óÑ§ --- EvolutionÕ½¶Ó --- GUET»úÆ÷ÈËÖÐÐÄ 
+  34          ×÷Õß£ºÀîÆÚ«|2100300317
+  35          *****************************************************/
+  36          
+  37          #include <rtx51tny.h>
+  38          #include <reg52.h>
+  39          #include <stdio.h>
+  40          #include "main.h"
+  41          
+  42          /****************************************************
+  43          º¯ Êý Ãû£ºState_checking(void) _task_ 0
+  44          ¹¦    ÄÜ£ºÈÎÎñ0£¬ÏµÍ³ÔËÐÐÈë¿Ú
+  45          Èë¿Ú²ÎÊý£ºÎÞ
+  46          ·µ »Ø Öµ£ºÎÞ
+  47          Ó¦ÓÃ·¶Î§£ºÏµÍ³Èë¿Ú
+  48          ±¸    ×¢£º
+  49          *****************************************************/
+  50          void State_checking(void) _task_ 0 {
+  51   1        EA = 0;//³õÊ¼»¯
+  52   1        EX0 = 1; 
+  53   1        IT0 = 1;
+C51 COMPILER V9.60.0.0   MAIN                                                              06/30/2023 01:45:46 PAGE 2   
+
+  54   1        uart_init();
+  55   1        //Timer1Init();
+  56   1        OLED_Init();
+  57   1        EA = 1;
+  58   1        LED = 0xFE;
+  59   1        os_create_task (1);//´´½¨ÈÎÎñ
+  60   1        //os_create_task (2);
+  61   1        os_create_task (3);
+  62   1         while (1){
+  63   2           oled();//oledÆÁ¿ØÖÆ
+  64   2         }
+  65   1      }
+  66          
+  67          /****************************************************
+  68          º¯ Êý Ãû£ºLED_CTRL (void) _task_ 1
+  69          ¹¦    ÄÜ£ºÈÎÎñ1£¬ÍâÉè¿ØÖÆ
+  70          Èë¿Ú²ÎÊý£ºÎÞ
+  71          ·µ »Ø Öµ£ºÎÞ
+  72          Ó¦ÓÃ·¶Î§£ºÏµÍ³µ÷ÓÃ
+  73          ±¸    ×¢£º
+  74          *****************************************************/
+  75          void LED_CTRL (void) _task_ 1 {
+  76   1          while(1){
+  77   2            if(display_mode == 3){
+  78   3              motor_control();//µç»ú¿ØÖÆ
+  79   3            }else{
+  80   3              led();//ledµÆ¿ØÖÆ
+  81   3            }
+  82   2          }
+  83   1      }
+  84          
+  85          /****************************************************
+  86          º¯ Êý Ãû£ºvoid MOTOR_CTRL (void) _task_ 2
+  87          ¹¦    ÄÜ£ºÈÎÎñ2£¬µç»ú¿ØÖÆ
+  88          Èë¿Ú²ÎÊý£ºÎÞ
+  89          ·µ »Ø Öµ£ºÎÞ
+  90          Ó¦ÓÃ·¶Î§£ºÏµÍ³µ÷ÓÃ
+  91          ±¸    ×¢£º
+  92          *****************************************************/
+  93          void MOTOR_CTRL (void) _task_ 2 {
+  94   1          while (1){
+  95   2            if(display_mode == 3){
+  96   3              motor_control();//µç»ú¿ØÖÆ
+  97   3            }else{
+  98   3              os_wait2(K_TMO,255);//×èÈûÈÎÎñ£¬ÊÍ·Å×ÊÔ´
+  99   3            }
+ 100   2          }
+ 101   1      }
+ 102          
+ 103          /****************************************************
+ 104          º¯ Êý Ãû£ºMODE_CTRL (void) _task_ 3
+ 105          ¹¦    ÄÜ£ºÈÎÎñ3£¬°´¼ü¼ì²â
+ 106          Èë¿Ú²ÎÊý£ºÎÞ
+ 107          ·µ »Ø Öµ£ºÎÞ
+ 108          Ó¦ÓÃ·¶Î§£ºÏµÍ³µ÷ÓÃ
+ 109          ±¸    ×¢£º
+ 110          *****************************************************/
+ 111          void MODE_CTRL (void) _task_ 3 {
+ 112   1        while(1){
+ 113   2          os_wait2(K_TMO,250);//Í¨¹ýÈÎÎñ×èÈûÀ´¿ØÖÆÈÎÎñÆµÂÊ£¬½ÚÔ¼×ÊÔ´
+ 114   2          motor_speed_choose();//µç»úËÙ¶ÈÑ¡Ôñ
+ 115   2          single_key_scan();//µ¥°´¼üÉ¨Ãè
+C51 COMPILER V9.60.0.0   MAIN                                                              06/30/2023 01:45:46 PAGE 3   
+
+ 116   2        }
+ 117   1      }
+ 118          
+ 119          //void timer1() interrupt 3{
+ 120          //  motor_speed_fbd();
+ 121          //  TF1 = 0;    //Çå³ýTF1±êÖ¾
+ 122          //}
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     87    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

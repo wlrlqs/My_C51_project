@@ -1,0 +1,62 @@
+C51 COMPILER V9.60.0.0   TIMER1                                                            06/28/2023 10:02:30 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE TIMER1
+OBJECT MODULE PLACED IN timer1.OBJ
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE timer1.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include "timer1.h"
+   2          
+   3          int timer1_interrupt_counter_V = 0;
+   4          
+   5          typedef unsigned int u16;
+   6          typedef unsigned char u8;
+   7          
+   8          static TIMER1_CallBackType tIMER1_CallBackTable[3];
+   9          
+  10          
+  11          void timer1_IR() interrupt 3{
+  12   1          static u16 timer1_interrupt_counter = 0;
+  13   1          TR1 = 0; 
+  14   1          TH1 = 0xFC;
+  15   1          TL1 = 0x6b;
+  16   1          TR1 = 1; 
+  17   1          timer1_interrupt_counter++;
+  18   1          if( timer1_interrupt_counter >= timer1_interrupt_counter_V ) {  
+  19   2              timer1_interrupt_counter = 0;
+  20   2              tIMER1_CallBackTable[1]();
+  21   2          }
+  22   1      }
+  23          
+  24          void timer1_start(int ms, TIMER1_CallBackType AppCBFun){
+  25   1        timer1_interrupt_counter_V = ms;
+  26   1        tIMER1_CallBackTable[1] = AppCBFun;
+  27   1        
+  28   1        TMOD &= 0x0f;    
+  29   1        TMOD |= 0x10;    
+  30   1        TH1 = 0xFC;
+  31   1        TL1 = 0x6b;
+  32   1        EA = 1;   
+  33   1        ET1 = 1; 
+  34   1        TR1 = 1; 
+  35   1        
+  36   1        if(timer1_interrupt_counter_V < 1 || timer1_interrupt_counter_V > 60000 ){ TR1 = 0;}
+  37   1      }
+  38          
+  39          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    163    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     13    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

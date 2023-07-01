@@ -1,0 +1,26 @@
+C51 COMPILER V9.60.0.0   RECIVE_DRIVER                                                     10/25/2022 23:10:47 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE RECIVE_DRIVER
+OBJECT MODULE PLACED IN .\Objects\Recive_driver.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE Recive_driver.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\
+                    -Listings\Recive_driver.lst) TABS(2) OBJECT(.\Objects\Recive_driver.obj)
+
+line level    source
+
+   1          #include "head.h"
+   2          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,216 @@
+C51 COMPILER V9.53.0.0   MAIN                                                              05/23/2022 00:17:06 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          
+   2          #include "reg51.h"
+   3          #include "intrins.h"
+   4          #define uchar unsigned char
+   5          #define uint unsigned int
+   6                  
+   7          sbit SW1=P3^2;//P1^0;    //S1按键
+   8          sbit LED1=P2^6;//P1^1;
+   9          sbit LED2=P2^7;//P1^2;
+  10          sbit LED3=P2^2;//P1^3;
+  11          sbit LED4=P2^3;//P1^4;
+  12           
+  13          //ESP8266  EN、vcc脚接 vcc 3.3 GND 接地，必须和51共地
+  14          //ESP8266  TX 接P3-^0, RX 接P3^1
+  15           
+  16          
+  17           
+  18          bit flag=0;
+  19           
+  20          uchar SendBuf[9]="OK ";
+  21          uchar RecBuf[15];
+  22          uchar RecNum=0;
+  23           
+  24          void delay_10us(uint us); //延时
+  25          void delay(uint n);   //延时
+  26          void UART_Init();   
+  27          void UART_SendByte(uchar dat);
+  28          void ESP8266_SendCmd(uchar *pbuf);
+  29          void ESP8266_SendData(uchar *pbuf); 
+  30          void ESP8266_ModeInit(void);    //WIFI模块初始化
+  31          void UART_Irq( );    // 接收信号
+  32          
+  33          void Delay1ms(int k)            //@11.0592MHz
+  34          {
+  35   1              for(k;k>=0;k--)
+  36   1              {
+  37   2              unsigned char i, j;
+  38   2      
+  39   2              _nop_();
+  40   2              _nop_();
+  41   2              _nop_();
+  42   2              i = 11;
+  43   2              j = 190;
+  44   2              do
+  45   2              {
+  46   3                      while (--j);
+  47   3              } while (--i);
+  48   2              }
+  49   1      }
+  50          void delay_10us(uint us)
+  51          {
+  52   1              while(us--);
+  53   1      }
+  54           
+  55          void delay(uint n)
+C51 COMPILER V9.53.0.0   MAIN                                                              05/23/2022 00:17:06 PAGE 2   
+
+  56          {
+  57   1              uint i,j;
+  58   1              for(i=0;i<n;i++)
+  59   1                      for(j=0;j<100;j++);
+  60   1      }
+  61           
+  62          void UART_Init()
+  63          {
+  64   1              SCON=0X50;                              //串口：工作方式1
+  65   1              TMOD=0X20;                              //定时器：工作方式2
+  66   1              TH1=0xFD;                               //波特率：9600
+  67   1              TL1=0xFD;
+  68   1              ES=0;                                   //禁止串口中断
+  69   1              EA=1;                                   //使能总中断
+  70   1              TR1=1;                                  //启动计数器
+  71   1      }
+  72           
+  73          void UART_SendByte(uchar dat)
+  74          {
+  75   1              ES=0;                                   //禁止串口中断
+  76   1              SBUF=dat;                               //串口发送
+  77   1              while(TI==0);                           //等待发送结束
+  78   1              TI=0;                                   //发送标志位清零
+  79   1              ES=1;                                   //使能串口中断
+  80   1      }
+  81           
+  82          void ESP8266_SendCmd(uchar *pbuf)
+  83          {
+  84   1              while(*pbuf!='\0')                              //遇到空格跳出循环      
+  85   1              {
+  86   2                              UART_SendByte(*pbuf);
+  87   2                              delay_10us(5);
+  88   2                              pbuf++; 
+  89   2              }
+  90   1              delay_10us(5);
+  91   1              UART_SendByte('\r');                            //回车
+  92   1              delay_10us(5);
+  93   1              UART_SendByte('\n');                            //换行
+  94   1              delay(1000);
+  95   1      }
+  96           
+  97          void ESP8266_SendData(uchar *pbuf)    
+  98          {
+  99   1              uchar i=0;
+ 100   1              ESP8266_SendCmd("AT+CIPSEND=0,9");  //发送数据：AT+CIPSEND=<id>,<length>
+ 101   1              for(i=0;i<=8;i++)
+ 102   1              {
+ 103   2                      UART_SendByte(*pbuf);
+ 104   2                      delay_10us(5);
+ 105   2                      pbuf++; 
+ 106   2              }
+ 107   1      }
+ 108           
+ 109          void ESP8266_ModeInit(void)    //WIFI模块初始化
+ 110          {
+ 111   1              //AT+CWSAP_DEF="TCP_Server","12345678",5,4
+ 112   1              ESP8266_SendCmd("AT+CWMODE=2");    //设置路由器模式 1:Station,，2:AP，3:Station+AP
+ 113   1              ESP8266_SendCmd("AT+CWSAP=\"LQS的智能垃圾桶\",\"12345678\",5,4");  //设置WIFI热点名称及密码
+ 114   1              ESP8266_SendCmd("AT+CIPAP=\"192.168.4.2\"");   //设置AP的IP地址
+ 115   1              ESP8266_SendCmd("AT+RST");                  //重新启动wifi模块
+ 116   1              ESP8266_SendCmd("AT+CIPMUX=1");         //开启多连接模式
+ 117   1              ESP8266_SendCmd("AT+CIPSERVER=1,8080");    //启动TCP/IP 端口为8080
+C51 COMPILER V9.53.0.0   MAIN                                                              05/23/2022 00:17:06 PAGE 3   
+
+ 118   1              /*ESP8266_SendCmd("AT+CWMODE=1");
+ 119   1              ESP8266_SendCmd("AT+RST");
+ 120   1              delay(1000);
+ 121   1              ESP8266_SendCmd("AT+CWLAP");
+ 122   1              Delay1ms(500);
+ 123   1              ESP8266_SendCmd("AT+CWJAP=\"TP-LINK_8F4E\",\"\"");
+ 124   1              Delay1ms(800);
+ 125   1              ESP8266_SendCmd("AT+CIPMUX=0");
+ 126   1              Delay1ms(800);
+ 127   1              ESP8266_SendCmd("AT+CIPSTART=“TCP”,“api.seniverse.com”,80");
+ 128   1              Delay1ms(200);
+ 129   1              ESP8266_SendCmd("AT+CIPMODE=1");
+ 130   1              Delay1ms(200);
+ 131   1              ESP8266_SendCmd("AT+CIPSEND");
+ 132   1              Delay1ms(200);
+ 133   1              ESP8266_SendCmd("GET https://api.seniverse.com/v3/weather/now.json?key=SaXVUHdckOVA6899e&location=beijing
+             -&language=zh-Hans&unit=c");*/
+ 134   1              
+ 135   1      }
+ 136           
+ 137          void main()
+ 138          {       
+ 139   1              Delay1ms(1000);
+ 140   1               P2=0xff;
+ 141   1              /* while(SW1);   */                             //等待S1键按下
+ 142   1              {LED1=LED2=LED3=LED4=1;}
+ 143   1               UART_Init();                                   //串口初始化
+ 144   1               ESP8266_ModeInit();
+ 145   1              
+ 146   1               ES=1;                                  //允许串口中断
+ 147   1              
+ 148   1               while(1)
+ 149   1               {
+ 150   2                       if(flag==1)
+ 151   2                       {
+ 152   3                               flag = 0;
+ 153   3                               ESP8266_SendData(SendBuf); 
+ 154   3                       }
+ 155   2                       delay(10);
+ 156   2               }              
+ 157   1      }
+ 158           
+ 159          void UART_Irq( ) interrupt 4   // 接收信号
+ 160          {
+ 161   1              if(RI)
+ 162   1              {
+ 163   2                      RI=0;
+ 164   2                      RecBuf[RecNum]=SBUF;   //接收到网络数据：+IPD,0<id>,1<数据长度>:F<接收的数据>
+ 165   2                      if(RecBuf[0]=='+')
+ 166   2                              RecNum++;
+ 167   2                      else 
+ 168   2                              RecNum=0;
+ 169   2                      if(RecNum==10)
+ 170   2                      {
+ 171   3                              RecNum=0;
+ 172   3                              if(RecBuf[0]=='+'&&RecBuf[1]=='I'&&RecBuf[2]=='P'&&RecBuf[3]=='D')
+ 173   3                              {
+ 174   4                                      switch(RecBuf[9])
+ 175   4                                      {
+ 176   5                                              case '1': LED1=0;break;                                         
+ 177   5                                              /*case '2': LED2=0;break;
+ 178   5                                              case '3': LED3=0;break;
+C51 COMPILER V9.53.0.0   MAIN                                                              05/23/2022 00:17:06 PAGE 4   
+
+ 179   5                                              case '4': LED4=0;break;*/
+ 180   5                                              default:LED1=1;//P2 = 0xff;                             
+ 181   5                                      }
+ 182   4                                      flag = 1;
+ 183   4                              }
+ 184   3                      }                               
+ 185   2              }
+ 186   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    383    ----
+   CONSTANT SIZE    =    131    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     25       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

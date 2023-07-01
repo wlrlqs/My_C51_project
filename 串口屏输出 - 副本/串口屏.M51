@@ -1,0 +1,223 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    06/26/2023  17:09:24  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5_C51\C51\BIN\BL51.EXE STARTUP.obj, main.obj TO ´®¿ÚÆÁ RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  main.obj (MAIN)
+  C:\KEIL_V5_C51\C51\LIB\C51S.LIB (?C?CLDPTR)
+
+
+LINK MAP OF MODULE:  ´®¿ÚÆÁ (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0001H     UNIT         _DATA_GROUP_
+            IDATA   0009H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     001EH     UNIT         ?PR?_DELAYMS?MAIN
+                    0021H     0002H                  *** GAP ***
+            CODE    0023H     0003H     ABSOLUTE     
+            CODE    0026H     0064H     UNIT         ?PR?SERIALPORTINTE?MAIN
+            CODE    008AH     0019H     UNIT         ?C?LIB_CODE
+            CODE    00A3H     0018H     UNIT         ?CO?MAIN
+            CODE    00BBH     0017H     UNIT         ?PR?SERIALINIT?MAIN
+            CODE    00D2H     0013H     UNIT         ?PR?_SENDSTRING?MAIN
+            CODE    00E5H     000EH     UNIT         ?PR?MAIN?MAIN
+            CODE    00F3H     000CH     UNIT         ?C_C51STARTUP
+            CODE    00FFH     0008H     UNIT         ?PR?_SENDBYTE?MAIN
+
+
+
+OVERLAY MAP OF MODULE:   ´®¿ÚÆÁ (?C_STARTUP)
+
+
+SEGMENT                           DATA_GROUP 
+  +--> CALLED SEGMENT           START    LENGTH
+-----------------------------------------------
+?C_C51STARTUP                   -----    -----
+  +--> ?PR?MAIN?MAIN
+
+?PR?MAIN?MAIN                   -----    -----
+  +--> ?PR?SERIALINIT?MAIN
+  +--> ?CO?MAIN
+  +--> ?PR?_SENDSTRING?MAIN
+
+?PR?_SENDSTRING?MAIN            -----    -----
+  +--> ?PR?_SENDBYTE?MAIN
+
+*** NEW ROOT ***************************************************
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/26/2023  17:09:24  PAGE 2
+
+
+
+?PR?SERIALPORTINTE?MAIN         0008H    0001H
+  +--> ?CO?MAIN
+  +--> ?PR?_SENDSTRING?MAIN
+  +--> ?PR?_SENDBYTE?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  ´®¿ÚÆÁ (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ?C_STARTUP
+  C:00F3H         SEGMENT       ?C_C51STARTUP
+  I:0009H         SEGMENT       ?STACK
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:00F6H         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0100H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:00F3H         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         126
+  C:00F3H         LINE#         133
+  C:00F5H         LINE#         134
+  C:00F6H         LINE#         135
+  C:00F7H         LINE#         136
+  C:00F9H         LINE#         185
+  C:00FCH         LINE#         196
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00B0H         PUBLIC        P3
+  C:00D2H         PUBLIC        _SendString
+  D:00A8H         PUBLIC        IE
+  D:00B8H         PUBLIC        IP
+  B:0098H.0       PUBLIC        RI
+  B:0098H.1       PUBLIC        TI
+  C:0026H         PUBLIC        SerialPortInte
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/26/2023  17:09:24  PAGE 3
+
+
+  C:00FFH         PUBLIC        _SendByte
+  C:00E5H         PUBLIC        main
+  D:0099H         PUBLIC        SBUF
+  D:0087H         PUBLIC        PCON
+  C:0003H         PUBLIC        _DelayMs
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  B:00A8H.3       PUBLIC        ET1
+  D:008DH         PUBLIC        TH1
+  D:008BH         PUBLIC        TL1
+  B:0088H.6       PUBLIC        TR1
+  D:00C8H         PUBLIC        T2CON
+  C:00BBH         PUBLIC        SerialInit
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          MAIN
+  C:00E5H         LINE#         10
+  C:00E5H         LINE#         11
+  C:00E5H         LINE#         12
+  C:00E8H         LINE#         13
+  C:00F1H         LINE#         14
+  -------         ENDPROC       MAIN
+  -------         PROC          SERIALINIT
+  C:00BBH         LINE#         35
+  C:00BBH         LINE#         36
+  C:00BEH         LINE#         37
+  C:00C1H         LINE#         38
+  C:00C4H         LINE#         39
+  C:00C7H         LINE#         40
+  C:00CAH         LINE#         41
+  C:00CDH         LINE#         42
+  C:00CFH         LINE#         43
+  C:00D1H         LINE#         45
+  -------         ENDPROC       SERIALINIT
+  -------         PROC          SERIALPORTINTE
+  -------         DO            
+  D:0008H         SYMBOL        rbyte
+  -------         ENDDO         
+  C:0026H         LINE#         49
+  C:0043H         LINE#         52
+  C:0046H         LINE#         53
+  C:0048H         LINE#         54
+  C:004BH         LINE#         55
+  C:0051H         LINE#         56
+  C:0057H         LINE#         57
+  C:005FH         LINE#         58
+  C:0068H         LINE#         59
+  C:006AH         LINE#         60
+  C:006FH         LINE#         61
+  C:006FH         LINE#         63
+  C:006FH         LINE#         65
+  -------         ENDPROC       SERIALPORTINTE
+  -------         PROC          _SENDBYTE
+  D:0007H         SYMBOL        sbyte
+  C:00FFH         LINE#         68
+  C:00FFH         LINE#         69
+  C:00FFH         LINE#         70
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/26/2023  17:09:24  PAGE 4
+
+
+  C:0101H         LINE#         71
+  C:0104H         LINE#         72
+  C:0106H         LINE#         73
+  -------         ENDPROC       _SENDBYTE
+  -------         PROC          _SENDSTRING
+  D:0001H         SYMBOL        pstr
+  C:00D2H         LINE#         76
+  C:00D2H         LINE#         77
+  C:00D2H         LINE#         78
+  C:00D8H         LINE#         79
+  C:00D8H         LINE#         80
+  C:00DBH         LINE#         81
+  C:00E2H         LINE#         82
+  C:00E4H         LINE#         83
+  -------         ENDPROC       _SENDSTRING
+  -------         PROC          _DELAYMS
+  D:0006H         SYMBOL        i
+  -------         DO            
+  D:0004H         SYMBOL        j
+  -------         ENDDO         
+  C:0003H         LINE#         85
+  C:0003H         LINE#         86
+  C:0003H         LINE#         88
+  C:000DH         LINE#         89
+  C:000DH         LINE#         90
+  C:0020H         LINE#         91
+  C:0020H         LINE#         92
+  -------         ENDPROC       _DELAYMS
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        ?C?CLDPTR
+  C:008AH         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAYMS?MAIN
+
+Program Size: data=10.0 xdata=0 code=261
+LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  0 ERROR(S)

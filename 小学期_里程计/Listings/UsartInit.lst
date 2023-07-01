@@ -1,0 +1,138 @@
+C51 COMPILER V9.60.0.0   USARTINIT                                                         06/30/2023 01:45:46 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE USARTINIT
+OBJECT MODULE PLACED IN .\Objects\UsartInit.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE Application\UsartInit.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND 
+                    -PRINT(.\Listings\UsartInit.lst) TABS(2) OBJECT(.\Objects\UsartInit.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <stdio.h>
+   3          #include "usartinit.h"
+   4          #define Usart_Data_length 5
+   5          sbit LED0 = P1^0;
+   6          
+   7          extern unsigned char getData;
+   8          unsigned char Usart_Data[Usart_Data_length];
+   9          unsigned int Usart_Data_count,Usart_flag = 0,Usart_error = 0;
+  10          
+  11          void Timer1Init(void)   //9毫秒@12.000MHz
+  12          {
+  13   1        //AUXR &= 0xBF;   //定时器时钟12T模式
+  14   1        TMOD &= 0x0F;   //设置定时器模式
+  15   1        TL1 = 0x20;   //设置定时初值
+  16   1        TH1 = 0xD1;   //设置定时初值
+  17   1        TF1 = 0;    //清除TF1标志
+  18   1        TR1 = 1;    //定时器1开始计时
+  19   1        ET1 = 1;
+  20   1      }
+  21          
+  22          /****************************************************
+  23          函 数 名：uart_init()
+  24          功    能：串口中断1初始化
+  25          入口参数：无
+  26          返 回 值：无
+  27          应用范围：任务0初始化调用
+  28          备    注：
+  29          *****************************************************/
+  30          void uart_init(){
+  31   1         PCON |= 0x80;    //使能波特率倍速位SMOD
+  32   1        SCON = 0x50;    //8位数据,可变波特率
+  33   1        TMOD &= 0x0F;   //清除定时器1模式位
+  34   1        TMOD |= 0x20;   //设定定时器1为8位自动重装方式
+  35   1        TL1 = 0xF3;   //设定定时初值
+  36   1        TH1 = 0xF3;   //设定定时器重装值
+  37   1        ET1 = 0;    //禁止定时器1中断
+  38   1        TR1 = 1;    //启动定时器1
+  39   1       
+  40   1          REN = 1; //不开启这个无法接受数据
+  41   1          ES = 1;  //开启串口中断使能
+  42   1          EA = 1;
+  43   1          TI = 0;
+  44   1          RI = 0;       //串口中断开关,采用查询法时不用打开中断   
+  45   1      } 
+  46          
+  47          /****************************************************
+  48          函 数 名：uart_send_byte()
+  49          功    能：发送一个字节的数据，形参d即为待发送数据
+  50          入口参数：unsigned char d
+  51          返 回 值：无
+  52          应用范围：串口收发
+  53          备    注：
+  54          *****************************************************/
+C51 COMPILER V9.60.0.0   USARTINIT                                                         06/30/2023 01:45:46 PAGE 2   
+
+  55          void uart_send_byte(unsigned char d){
+  56   1        ES = 0;
+  57   1        SBUF = d;
+  58   1        while(!TI);
+  59   1        TI = 0;   
+  60   1        ES = 1;
+  61   1      }
+  62          
+  63          /****************************************************
+  64          函 数 名：uart_send_string()
+  65          功    能：发送一个字符串
+  66          入口参数：unsigned char *str
+  67          返 回 值：无
+  68          应用范围：串口收发
+  69          备    注：
+  70          *****************************************************/
+  71          void uart_send_string(unsigned char *str){
+  72   1        while(*str){
+  73   2          uart_send_byte(*str++); 
+  74   2        }
+  75   1      }
+  76          
+  77          /****************************************************
+  78          函 数 名：uart(void) interrupt 4
+  79          功    能：串口收发中断
+  80          入口参数：无
+  81          返 回 值：无
+  82          应用范围：串口收发
+  83          备    注：
+  84          *****************************************************/
+  85          void uart(void) interrupt 4 {    //串口发送中断
+  86   1          if(RI){    //收到数据   
+  87   2              getData = SBUF;
+  88   2              if(Usart_flag && Usart_Data_count < Usart_Data_length - 1){//循环接收
+  89   3                Usart_Data_count ++;  
+  90   3                Usart_Data[Usart_Data_count] = getData;
+  91   3              }
+  92   2              if(Usart_flag && Usart_Data_count == Usart_Data_length - 1){//接收完成flag置0
+  93   3                Usart_flag = 0;
+  94   3                if((unsigned int)(Usart_Data[Usart_Data_length - 1]) != Usart_Data_length){//校验
+  95   4                  Usart_error = 1;
+  96   4                }else{
+  97   4                  Usart_error = 0;
+  98   4                  uart_send_string(Usart_Data);
+  99   4                }
+ 100   3              }
+ 101   2              if(getData == 0x5A){//收到帧头则开始
+ 102   3                Usart_flag = 1;
+ 103   3                Usart_Data_count = 0;  
+ 104   3                Usart_Data[Usart_Data_count] = getData;
+ 105   3              }
+ 106   2              RI=0;   //清中断请求
+ 107   2          }else{        //发送完一字节数据
+ 108   2             TI=0;
+ 109   2          }
+ 110   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    249    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+C51 COMPILER V9.60.0.0   USARTINIT                                                         06/30/2023 01:45:46 PAGE 3   
+
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

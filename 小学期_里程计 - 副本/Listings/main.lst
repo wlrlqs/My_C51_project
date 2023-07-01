@@ -1,0 +1,117 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/29/2023 12:10:40 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE Application\main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT
+                    -(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <rtx51tny.h>
+   2          #include <reg52.h>
+   3          #include <stdio.h>
+   4          #include "main.h"
+   5          #include "motor.h"
+   6          void State_checking(void) _task_ 0 {
+   7   1        EA = 0;//初始化
+   8   1        EX0 = 1; 
+   9   1        IT0 = 1;
+  10   1        uart_init();
+  11   1        OLED_Init();
+  12   1        EA = 1;
+  13   1        LED += 0xFE;
+  14   1        os_create_task (1);//创建任务
+  15   1        //os_create_task (2);
+  16   1        os_create_task (3);
+  17   1         while (1){
+  18   2           oled();
+  19   2         }
+  20   1      }
+  21          void LED_CTRL (void) _task_ 1 {
+  22   1          while(1){
+  23   2            if(display_mode == 3){
+  24   3              motor_control();
+  25   3            }else{
+  26   3              led();
+  27   3            }
+  28   2          }
+  29   1      }
+  30           
+  31          void USART_LED_CTRL (void) _task_ 2 {
+  32   1          while (1){
+  33   2            if(display_mode == 3){
+  34   3              motor_control();
+  35   3            }else{
+  36   3              os_wait2(K_TMO,50);
+  37   3            }
+  38   2          }
+  39   1      }
+  40           
+  41          void MODE_CTRL (void) _task_ 3 {
+  42   1        while(1){
+  43   2          os_wait2(K_TMO,250);//控制任务频率
+  44   2          motor_speed_choose();
+  45   2          if(key2==0){    //读引脚，如果引脚为低电平，则进入if
+  46   3              
+  47   3                  os_wait2(K_TMO,10); //延时10ms消抖
+  48   3                  if(key2==0){   //再次判断按键是否按下，防止干扰，增强稳定
+  49   4                    if(display_mode == 1){
+  50   5                      display_mode = 2;
+  51   5                    }else if(display_mode == 4){
+  52   5                      display_mode = 5;
+  53   5                    }else if(display_mode == 6){
+  54   5                      display_mode = 5;
+C51 COMPILER V9.60.0.0   MAIN                                                              06/29/2023 12:10:40 PAGE 2   
+
+  55   5                    }else if(display_mode == 3){
+  56   5                      speed_choose ++;
+  57   5                    if(speed_choose > 3){
+  58   6                      speed_choose = 0;
+  59   6                    }
+  60   5                    }
+  61   4                    while(key2==0);//等待按键松开，防止往下执行
+  62   4                  }
+  63   3              }
+  64   2          if(key3==0){    //读引脚，如果引脚为低电平，则进入if
+  65   3              
+  66   3                  os_wait2(K_TMO,10); //延时10ms消抖
+  67   3                  if(key3==0){   //再次判断按键是否按下，防止干扰，增强稳定
+  68   4                    if(display_mode == 3){
+  69   5                      display_mode = 1;
+  70   5                    }else if(display_mode == 1){
+  71   5                      display_mode = 5;
+  72   5                    }
+  73   4                       while(key3==0);//等待按键松开，防止往下执行
+  74   4                  }
+  75   3          }
+  76   2          if(key4==0){    //读引脚，如果引脚为低电平，则进入if
+  77   3                  os_wait2(K_TMO,10); //延时10ms消抖
+  78   3                  if(key4==0){   //再次判断按键是否按下，防止干扰，增强稳定
+  79   4                    while(key4==0);//等待按键松开，防止往下执行
+  80   4                  }
+  81   3          }
+  82   2          if(key5==0){    //读引脚，如果引脚为低电平，则进入if
+  83   3                  os_wait2(K_TMO,10); //延时10ms消抖
+  84   3                  if(key5==0){   //再次判断按键是否按下，防止干扰，增强稳定
+  85   4                    while(key5==0);//等待按键松开，防止往下执行
+  86   4                  }
+  87   3          }
+  88   2        }
+  89   1      }
+  90           
+  91          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    258    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

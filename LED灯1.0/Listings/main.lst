@@ -1,0 +1,82 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/26/2023 00:11:15 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\
+                    -main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          sbit LED0 = P1^0;
+   3          /**
+   4            * @brief ´®¿Ú³õÊ¼»¯
+   5            * @param  ÎÞ
+   6            * @retval ÎÞ
+   7            */
+   8          void Uart_Init()  //4800bps@11.0592MHz
+   9          {
+  10   1        SCON = 0x50;    //8Î»Êý¾Ý,¿É±ä²¨ÌØÂÊ
+  11   1        TMOD &= 0x0F;   //Éè¶¨¶¨Ê±Æ÷1Îª16Î»×Ô¶¯ÖØ×°·½Ê½
+  12   1        TL1 = 0xC7;   //Éè¶¨¶¨Ê±³õÖµ
+  13   1        TH1 = 0xFE;   //Éè¶¨¶¨Ê±³õÖµ
+  14   1        ET1 = 1;    //½ûÖ¹¶¨Ê±Æ÷1ÖÐ¶Ï
+  15   1        TR1 = 1;    //Æô¶¯¶¨Ê±Æ÷1
+  16   1        
+  17   1        //½ÓÊÕÊý¾ÝÍê³Éºó¾Í´¥·¢ÖÐ¶Ï
+  18   1        ES=1;
+  19   1        EA=1;
+  20   1      }
+  21          
+  22          /**
+  23            * @brief ´®¿Ú·¢ËÍÒ»Î»×Ö½ÚÊý¾Ý
+  24            * @param  Byte Òª·¢ËÍµÄ×Ö½ÚÊý¾Ý
+  25            * @retval ÎÞ
+  26            */
+  27          void Uart_SendByte(unsigned char Byte)
+  28          {
+  29   1        SBUF=Byte;   //Ïò»º´æÆ÷ÖÐÐ´ÈëÄÚÈÝ
+  30   1        while(TI==0);   //·¢ËÍÖÐ¶Ï±êÖ¾Î» Èç¹û¼ì²âµ½ÁË¼Ä´æÆ÷µÄTIÎ» Èç¹ûÎª0 ¾Í±íÊ¾Êý¾ÝÎ´·¢ËÍÍê³É  ·´¸´Ö´ÐÐ±¾ÌõÓï¾ä¼
+             -ì²âTIÎ»
+  31   1        //Èç¹ûTIÎª1 ¾Í±íÊ¾SUBFµÄÊý¾ÝÒÑ¾­·¢ËÍÍê³ÉÁË  ÂíÉÏÖ´ÐÐÏÂÌõÓï¾ä½«TIÎ»ÇåÁã
+  32   1        TI=0;
+  33   1      }
+  34          void main()
+  35          {
+  36   1        Uart_Init();
+  37   1        
+  38   1        while(1)
+  39   1        {
+  40   2          Uart_SendByte('a');
+  41   2        }
+  42   1      }
+  43          // ´®¿ÚÖÐ¶Ïº¯ÊýÄ£°å
+  44          void Uart_Routine() interrupt 4
+  45          {
+  46   1        if(RI==1)   //Èç¹û½ÓÊÕµ½Êý¾Ý ½ÓÊÕÍê³Éºó ²úÉúÖÐ¶Ï Èç¹ûÊÇ½ÓÊÕÖÐ¶Ï  
+  47   1          //·¢ËÍÊý¾ÝÒ²»á²úÉúÖÐ¶Ï
+  48   1        {
+  49   2          LED0 = ~LED0;  //´ÓSUBF»º´æÆ÷ÖÐ¶ÁÈ¡Êý¾Ý
+  50   2          //Uart_SendByte(SBUF);
+  51   2          RI=0;
+  52   2        }
+  53   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              06/26/2023 00:11:15 PAGE 2   
+
+  54          
+  55          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     47    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

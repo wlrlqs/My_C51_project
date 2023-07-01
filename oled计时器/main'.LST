@@ -1,0 +1,137 @@
+C51 COMPILER V9.53.0.0   MAIN_                                                             11/20/2021 17:26:18 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE MAIN_
+OBJECT MODULE PLACED IN main'.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main'.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "intrins.h"
+   2          #include "codetab.h"
+   3          #include "LQ12864.h"
+   4          #include "shijian.h"
+   5          #define uint unsigned int
+   6          #define uchar unsigned char
+   7          
+   8          void Delayms(uint xms)          //@11.0592MHz
+   9          {
+  10   1              unsigned char i, j;
+  11   1              while(xms)
+  12   1              {
+  13   2              _nop_();
+  14   2              i = 2;
+  15   2              j = 199;
+  16   2              do
+  17   2              {
+  18   3                      while (--j);
+  19   3              } while (--i);
+  20   2              xms--;
+  21   2              }
+  22   1      }
+  23          
+  24          //   0 0:0 0:0 0
+  25          int a=0,b=0,c=0,d=0,e=0,f=0;
+  26          void shijian()
+  27          {
+  28   1              f=f+2;
+  29   1              if(f=10)
+*** WARNING C276 IN LINE 29 OF main'.c: constant in condition expression
+  30   1              {
+  31   2                      f=0;
+  32   2                      e++;
+  33   2                      if(e=6)
+*** WARNING C276 IN LINE 33 OF main'.c: constant in condition expression
+  34   2                      {
+  35   3                              e=0;
+  36   3                              d++;
+  37   3                              if(d=10)
+*** WARNING C276 IN LINE 37 OF main'.c: constant in condition expression
+  38   3                              {
+  39   4                                      d=0;
+  40   4                                      c++;
+  41   4                                      if(c=6)
+*** WARNING C276 IN LINE 41 OF main'.c: constant in condition expression
+  42   4                                      {
+  43   5                                              c=0;
+  44   5                                              b++;
+  45   5                                              if(b=6)
+*** WARNING C276 IN LINE 45 OF main'.c: constant in condition expression
+  46   5                                              {
+  47   6                                                      b=0;
+  48   6                                                      a++;
+  49   6                                                      if(a=24)
+*** WARNING C276 IN LINE 49 OF main'.c: constant in condition expression
+C51 COMPILER V9.53.0.0   MAIN_                                                             11/20/2021 17:26:18 PAGE 2   
+
+  50   6                                                      {
+  51   7                                                              a=0;
+  52   7                                                      }
+  53   6                                              }
+  54   5                                      }
+  55   4                              }
+  56   3                      }
+  57   2              }
+  58   1      
+  59   1      }
+  60          
+  61          
+  62          
+  63          void Timer0_Init()//Initialization using timer 0 only
+  64          {
+  65   1              //1ms
+  66   1              TMOD=0x01;//Set the mode of timer 0
+  67   1              TF0=0;//Interrupt flag,The end of the timer becomes 1 and an interrupt is requested
+  68   1              TR0=1;//Allowed to count
+  69   1              TH0=64535/256;//High eight digit
+  70   1              TL0=64535%256;//Low eight digit
+  71   1              ET0=1;//Open the interrupt
+  72   1              EA=1;//Interrupt master switch
+  73   1              PT0=0;//Priority setting 1=High 0=Low
+  74   1      }
+  75          
+  76          void main()
+  77          {
+  78   1              Delayms(100);
+  79   1              OLED_Init(); //oeld初始化
+  80   1              Delayms(100);
+  81   1              Timer0_Init();
+  82   1              OLED_P8x16Str(29,0,"LQS'Clock");
+  83   1              OLED_P8x16Str(33,2,"  :  :  ");
+  84   1              while(1)
+  85   1              {
+  86   2      
+  87   2              }
+  88   1      
+  89   1      }
+  90          
+  91          uint T0count=0;
+  92          void T0_interrput() interrupt 1
+  93          {
+  94   1              T0count++;
+  95   1              TH0=64535/256;//High eight digit
+  96   1              TL0=64535%256;//Low eight digit
+  97   1              if(T0count=2000)
+*** WARNING C276 IN LINE 97 OF main'.c: constant in condition expression
+  98   1              {
+  99   2                      shijian();
+ 100   2                      T0count=0;
+ 101   2                      
+ 102   2              }
+ 103   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1079    ----
+   CONSTANT SIZE    =   6475    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V9.53.0.0   MAIN_                                                             11/20/2021 17:26:18 PAGE 3   
+
+   DATA SIZE        =     14      31
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  7 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,54 @@
+C51 COMPILER V9.57.0.0   TIMER0                                                            06/27/2022 03:12:54 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE TIMER0
+OBJECT MODULE PLACED IN .\Objects\timer0.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE timer0.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\ti
+                    -mer0.lst) TABS(2) OBJECT(.\Objects\timer0.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "car.h"
+   3          void Timer0Init()    //定时器初始化函数
+   4          {
+   5   1        TMOD|=0X01;//选择为定时器0模式，工作方式1，仅用TR0打开启动。
+   6   1      
+   7   1        TH0=0XFC; //给定时器赋初值，定时1ms
+   8   1        TL0=0X18; 
+   9   1        ET0=1;//打开定时器0中断允许
+  10   1        EA=1;//打开总中断
+  11   1        TR0=1;//打开定时器     
+  12   1      }
+  13          
+  14          extern unsigned char Left_Speed_Ratio;
+  15          extern unsigned char Right_Speed_Ratio;
+  16          unsigned int time=0; 
+  17          extern unsigned char pwm_val_left;
+  18          extern unsigned char pwm_val_right;
+  19          
+  20          void timer0()interrupt 1 using 2  //定时器中断函数，此处配置为1ms产生一次中断，对PWM�
+             -��输出进行控制
+  21          { 
+  22   1        TH0=0XFC; //给定时器赋初值，定时1ms
+  23   1        TL0=0X18;
+  24   1        time++; 
+  25   1        pwm_val_left++; 
+  26   1        pwm_val_right++; 
+  27   1        pwm_out_left_moto(); 
+  28   1        pwm_out_right_moto(); 
+  29   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     64    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

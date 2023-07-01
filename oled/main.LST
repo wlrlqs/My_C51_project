@@ -1,0 +1,55 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              05/23/2023 19:51:00 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #define uchar unsigned char   //宏定义，为方便编程
+   3          #define uint unsigned int
+   4          #define DIGI P0         //宏定义，将P0口定义为数码管段选接口
+   5          #define SELECT P2         //宏定义，将P2定义为数码管选择口
+   6          
+   7          unsigned char  digivalue[]={0x07,0x06,0x4F,0x3F,0x3F,0x4F,0x3F,0x3F};
+   8          //显示的数字数组，依次为0，1，..，7
+   9          unsigned char select[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80}; //选择数码管数组，依次选择1，2，..，8
+  10          
+  11          void delay() //延迟函数，决定数码管跳变的间隔时间
+  12          { 
+  13   1        uchar ii=200; //若发现数码管闪烁，调节这里即可
+  14   1        while(ii--);
+  15   1      }
+  16          
+  17          int main() //主函数
+  18          {
+  19   1        uchar i=0;
+  20   1        while(1)
+  21   1        { 
+  22   2          for(i=0;i<8;i++)    //8个数码管轮流显示
+  23   2          {
+  24   3            SELECT=select[i];   //选择第i个数码管
+  25   3            DIGI=0x90;
+  26   3            DIGI=digivalue[i];  //显示i
+  27   3            delay();
+  28   3          } 
+  29   2        }
+  30   1        return 0;
+  31   1      }
+*** WARNING C294 IN LINE 30 OF main.c: unreachable code
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     44    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     16    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

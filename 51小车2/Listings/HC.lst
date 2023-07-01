@@ -1,0 +1,80 @@
+C51 COMPILER V9.57.0.0   HC                                                                06/27/2022 18:12:15 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE HC
+OBJECT MODULE PLACED IN .\Objects\HC.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE HC.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\HC.lst
+                    -) TABS(2) OBJECT(.\Objects\HC.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include <intrins.h>
+   3          
+   4          sbit Trig= P2^1; //产生脉冲引脚
+   5          sbit Echo= P2^0; //回波引脚
+   6          float S=0;
+   7          unsigned int flag;
+   8          unsigned int measure_time;
+   9          char M_sensor; 
+  10          void  StartModule()              //启动超声波模块
+  11            {
+  12   1          Trig=1;                     
+  13   1          _nop_(); 
+  14   1          _nop_(); 
+  15   1          _nop_(); 
+  16   1          _nop_(); 
+  17   1          _nop_(); 
+  18   1          _nop_(); 
+  19   1          _nop_(); 
+  20   1          _nop_(); 
+  21   1          _nop_(); 
+  22   1          _nop_(); 
+  23   1          _nop_(); 
+  24   1          _nop_(); 
+  25   1          _nop_(); 
+  26   1          _nop_(); 
+  27   1          _nop_(); 
+  28   1          _nop_(); 
+  29   1          _nop_();
+  30   1          _nop_(); 
+  31   1          _nop_(); 
+  32   1          _nop_(); 
+  33   1          _nop_();
+  34   1          Trig=0;
+  35   1        }
+  36            
+  37          /*void Conut(void)
+  38            {
+  39             measure_time=TH2*256+TL2;
+  40             TH2=0;
+  41             TL2=0;
+  42             S=(measure_time*1.87)/100;     //算出来是CM
+  43             if(flag==1||S>50||S<2)       //超出测量
+  44             {
+  45              flag=0;
+  46             M_sensor=1;
+  47             }
+  48             else
+  49               {
+  50             M_sensor=0;
+  51               }
+  52            }
+  53          */
+  54            
+C51 COMPILER V9.57.0.0   HC                                                                06/27/2022 18:12:15 PAGE 2   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     26    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      9    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

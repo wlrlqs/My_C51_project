@@ -1,0 +1,340 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        05/23/2022  00:17:06  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE STARTUP.obj, main.obj TO 1 RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?CLDPTR)
+
+
+LINK MAP OF MODULE:  1 (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0003H     UNIT         _DATA_GROUP_
+                    000BH     0015H                  *** GAP ***
+            BIT     0020H.0   0000H.1   UNIT         ?BI?MAIN
+                    0020H.1   0000H.7                *** GAP ***
+            DATA    0021H     0019H     UNIT         ?DT?MAIN
+            IDATA   003AH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0020H     UNIT         ?PR?_DELAY?MAIN
+            CODE    0023H     0003H     ABSOLUTE     
+            CODE    0026H     008CH     UNIT         ?C_C51STARTUP
+            CODE    00B2H     0083H     UNIT         ?CO?MAIN
+            CODE    0135H     0052H     UNIT         ?PR?UART_IRQ?MAIN
+            CODE    0187H     0036H     UNIT         ?PR?ESP8266_MODEINIT?MAIN
+            CODE    01BDH     0031H     UNIT         ?PR?MAIN?MAIN
+            CODE    01EEH     0030H     UNIT         ?PR?_ESP8266_SENDDATA?MAIN
+            CODE    021EH     0026H     UNIT         ?PR?_ESP8266_SENDCMD?MAIN
+            CODE    0244H     001FH     UNIT         ?PR?_DELAY1MS?MAIN
+            CODE    0263H     0019H     UNIT         ?C?LIB_CODE
+            CODE    027CH     0013H     UNIT         ?PR?UART_INIT?MAIN
+            CODE    028FH     0012H     UNIT         ?PR?_DELAY_10US?MAIN
+            CODE    02A1H     0011H     UNIT         ?C_INITSEG
+            CODE    02B2H     000CH     UNIT         ?PR?_UART_SENDBYTE?MAIN
+
+
+
+OVERLAY MAP OF MODULE:   1 (?C_STARTUP)
+
+
+SEGMENT                              DATA_GROUP 
+  +--> CALLED SEGMENT              START    LENGTH
+--------------------------------------------------
+?C_C51STARTUP                      -----    -----
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+BL51 BANKED LINKER/LOCATER V6.22                                                      05/23/2022  00:17:06  PAGE 2
+
+
+
+?PR?MAIN?MAIN                      -----    -----
+  +--> ?PR?_DELAY1MS?MAIN
+  +--> ?PR?UART_INIT?MAIN
+  +--> ?PR?ESP8266_MODEINIT?MAIN
+  +--> ?PR?_ESP8266_SENDDATA?MAIN
+  +--> ?PR?_DELAY?MAIN
+
+?PR?_DELAY1MS?MAIN                 0008H    0002H
+
+?PR?ESP8266_MODEINIT?MAIN          -----    -----
+  +--> ?CO?MAIN
+  +--> ?PR?_ESP8266_SENDCMD?MAIN
+
+?PR?_ESP8266_SENDCMD?MAIN          -----    -----
+  +--> ?PR?_DELAY_10US?MAIN
+  +--> ?PR?_UART_SENDBYTE?MAIN
+  +--> ?PR?_DELAY?MAIN
+
+?PR?_DELAY_10US?MAIN               -----    -----
+  +--> ?PR?_UART_SENDBYTE?MAIN
+
+?PR?_ESP8266_SENDDATA?MAIN         0008H    0003H
+  +--> ?CO?MAIN
+  +--> ?PR?_ESP8266_SENDCMD?MAIN
+  +--> ?PR?_DELAY_10US?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  1 (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ?C_STARTUP
+  C:0026H         SEGMENT       ?C_C51STARTUP
+  I:003AH         SEGMENT       ?STACK
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:0029H         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0100H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:0026H         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+BL51 BANKED LINKER/LOCATER V6.22                                                      05/23/2022  00:17:06  PAGE 3
+
+
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         126
+  C:0026H         LINE#         133
+  C:0028H         LINE#         134
+  C:0029H         LINE#         135
+  C:002AH         LINE#         136
+  C:002CH         LINE#         185
+  C:002FH         LINE#         196
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  C:0244H         PUBLIC        _Delay1ms
+  B:00A8H.7       PUBLIC        EA
+  B:00A0H.6       PUBLIC        LED1
+  B:00A0H.7       PUBLIC        LED2
+  B:00A0H.2       PUBLIC        LED3
+  B:00A0H.3       PUBLIC        LED4
+  C:0003H         PUBLIC        _delay
+  B:00A8H.4       PUBLIC        ES
+  B:0098H.0       PUBLIC        RI
+  B:0020H.0       PUBLIC        flag
+  B:0098H.1       PUBLIC        TI
+  C:01BDH         PUBLIC        main
+  C:01EEH         PUBLIC        _ESP8266_SendData
+  D:0021H         PUBLIC        SendBuf
+  D:0099H         PUBLIC        SBUF
+  C:027CH         PUBLIC        UART_Init
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:002AH         PUBLIC        RecBuf
+  C:0296H         PUBLIC        _delay_10us
+  C:0187H         PUBLIC        ESP8266_ModeInit
+  C:02B2H         PUBLIC        _UART_SendByte
+  C:021EH         PUBLIC        _ESP8266_SendCmd
+  C:0135H         PUBLIC        UART_Irq
+  D:0039H         PUBLIC        RecNum
+  D:008DH         PUBLIC        TH1
+  D:008BH         PUBLIC        TL1
+  B:0088H.6       PUBLIC        TR1
+  -------         PROC          _DELAY1MS
+  D:0006H         SYMBOL        k
+  -------         DO            
+  D:0008H         SYMBOL        i
+  D:0009H         SYMBOL        j
+  -------         ENDDO         
+  C:0244H         LINE#         33
+  C:0244H         LINE#         34
+  C:0244H         LINE#         35
+  C:024CH         LINE#         36
+  C:024CH         LINE#         39
+  C:024DH         LINE#         40
+  C:024EH         LINE#         41
+  C:024FH         LINE#         42
+BL51 BANKED LINKER/LOCATER V6.22                                                      05/23/2022  00:17:06  PAGE 4
+
+
+  C:0252H         LINE#         43
+  C:0255H         LINE#         45
+  C:0255H         LINE#         46
+  C:0258H         LINE#         47
+  C:025BH         LINE#         48
+  C:0262H         LINE#         49
+  -------         ENDPROC       _DELAY1MS
+  C:028FH         SYMBOL        L?0050
+  C:0292H         SYMBOL        L?0051
+  -------         PROC          L?0049
+  -------         ENDPROC       L?0049
+  C:028FH         SYMBOL        L?0050
+  C:0292H         SYMBOL        L?0051
+  -------         PROC          _DELAY_10US
+  D:0006H         SYMBOL        us
+  C:0296H         LINE#         50
+  C:0296H         LINE#         51
+  C:0296H         LINE#         52
+  C:02A0H         LINE#         53
+  -------         ENDPROC       _DELAY_10US
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        n
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0002H         SYMBOL        j
+  -------         ENDDO         
+  C:0003H         LINE#         55
+  C:0003H         LINE#         56
+  C:0003H         LINE#         58
+  C:000DH         LINE#         59
+  C:0022H         LINE#         60
+  -------         ENDPROC       _DELAY
+  -------         PROC          UART_INIT
+  C:027CH         LINE#         62
+  C:027CH         LINE#         63
+  C:027CH         LINE#         64
+  C:027FH         LINE#         65
+  C:0282H         LINE#         66
+  C:0285H         LINE#         67
+  C:0288H         LINE#         68
+  C:028AH         LINE#         69
+  C:028CH         LINE#         70
+  C:028EH         LINE#         71
+  -------         ENDPROC       UART_INIT
+  -------         PROC          _UART_SENDBYTE
+  D:0007H         SYMBOL        dat
+  C:02B2H         LINE#         73
+  C:02B2H         LINE#         74
+  C:02B2H         LINE#         75
+  C:02B4H         LINE#         76
+  C:02B6H         LINE#         77
+  C:02B9H         LINE#         78
+  C:02BBH         LINE#         79
+  C:02BDH         LINE#         80
+  -------         ENDPROC       _UART_SENDBYTE
+  -------         PROC          _ESP8266_SENDCMD
+  D:0001H         SYMBOL        pbuf
+BL51 BANKED LINKER/LOCATER V6.22                                                      05/23/2022  00:17:06  PAGE 5
+
+
+  C:021EH         LINE#         82
+  C:021EH         LINE#         83
+  C:021EH         LINE#         84
+  C:0224H         LINE#         85
+  C:0224H         LINE#         86
+  C:0224H         LINE#         87
+  C:0227H         LINE#         88
+  C:022EH         LINE#         89
+  C:0230H         LINE#         90
+  C:0233H         LINE#         91
+  C:0235H         LINE#         92
+  C:0238H         LINE#         93
+  C:023DH         LINE#         94
+  -------         ENDPROC       _ESP8266_SENDCMD
+  -------         PROC          _ESP8266_SENDDATA
+  D:0008H         SYMBOL        pbuf
+  -------         DO            
+  D:0005H         SYMBOL        i
+  -------         ENDDO         
+  C:01EEH         LINE#         97
+  C:01F4H         LINE#         98
+  C:01F4H         LINE#         99
+  C:01F6H         LINE#         100
+  C:01FFH         LINE#         101
+  C:0201H         LINE#         102
+  C:0201H         LINE#         103
+  C:020BH         LINE#         104
+  C:020EH         LINE#         105
+  C:0219H         LINE#         106
+  C:021DH         LINE#         107
+  -------         ENDPROC       _ESP8266_SENDDATA
+  -------         PROC          ESP8266_MODEINIT
+  C:0187H         LINE#         109
+  C:0187H         LINE#         110
+  C:0187H         LINE#         112
+  C:0190H         LINE#         113
+  C:0199H         LINE#         114
+  C:01A2H         LINE#         115
+  C:01ABH         LINE#         116
+  C:01B4H         LINE#         117
+  -------         ENDPROC       ESP8266_MODEINIT
+  -------         PROC          MAIN
+  C:01BDH         LINE#         137
+  C:01BDH         LINE#         138
+  C:01BDH         LINE#         139
+  C:01C4H         LINE#         140
+  C:01C7H         LINE#         142
+  C:01CFH         LINE#         143
+  C:01D2H         LINE#         144
+  C:01D5H         LINE#         146
+  C:01D7H         LINE#         148
+  C:01D7H         LINE#         149
+  C:01D7H         LINE#         150
+  C:01DAH         LINE#         151
+  C:01DAH         LINE#         152
+  C:01DCH         LINE#         153
+  C:01E5H         LINE#         154
+BL51 BANKED LINKER/LOCATER V6.22                                                      05/23/2022  00:17:06  PAGE 6
+
+
+  C:01E5H         LINE#         155
+  C:01ECH         LINE#         156
+  -------         ENDPROC       MAIN
+  -------         PROC          UART_IRQ
+  C:0135H         LINE#         159
+  C:013EH         LINE#         161
+  C:0141H         LINE#         162
+  C:0141H         LINE#         163
+  C:0143H         LINE#         164
+  C:014AH         LINE#         165
+  C:014FH         LINE#         166
+  C:0153H         LINE#         168
+  C:0156H         LINE#         169
+  C:015CH         LINE#         170
+  C:015CH         LINE#         171
+  C:015EH         LINE#         172
+  C:0172H         LINE#         173
+  C:0172H         LINE#         174
+  C:0178H         LINE#         175
+  C:0178H         LINE#         176
+  C:017CH         LINE#         180
+  C:017EH         LINE#         181
+  C:017EH         LINE#         182
+  C:0180H         LINE#         183
+  C:0180H         LINE#         184
+  C:0180H         LINE#         185
+  C:0180H         LINE#         186
+  -------         ENDPROC       UART_IRQ
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        ?C?CLDPTR
+  C:0263H         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+Program Size: data=37.1 xdata=0 code=702
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

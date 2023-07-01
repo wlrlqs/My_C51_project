@@ -1,0 +1,229 @@
+C51 COMPILER V9.53.0.0   MAIN                                                              11/16/2021 20:45:48 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include<string.h>
+   3          sbit L1 = P1^0;
+   4          sbit kaiguan = P3^4;
+   5          sbit L2 = P1^1;
+   6          sbit L3 = P1^2;
+   7          sbit L4 = P1^3;
+   8          sbit L5 = P1^4;
+   9          sbit L6 = P1^5;
+  10          sbit L7 = P1^6;
+  11          sbit L8 = P1^7;
+  12          unsigned char Usart_Receive[20]={0};
+  13          unsigned char Usart_Cnt=0;
+  14          bit Usart_AT_flage;
+  15          unsigned char code RST[]="AT+RST\r\n"; 
+  16          unsigned char code CWMODE2[]="AT+CWMODE=2\r\n";
+  17          unsigned char code CIPMUX[]="AT+CIPMUX=1\r\n";
+  18          unsigned char code CIFSR[]="AT+CIFSR\r\n";
+  19          unsigned char code CIPSERVER[]="AT+CIPSERVER=1,8080\r\n";
+  20          /**********************************************************/
+  21          void delay_ms(unsigned long t)
+  22          {
+  23   1              unsigned int x,y;
+  24   1              for(x=t;x>0;x--)
+  25   1              {
+  26   2                      for(y=110;y>0;y--)
+  27   2                      {
+  28   3                      }
+  29   2              }
+  30   1      }
+  31          /**********************************************************/
+  32          void delays(void)
+  33          {
+  34   1              unsigned char a,b,c;
+  35   1              for(c=95;c>0;c--)
+  36   1              {
+  37   2                      for (b=26;b>0;b--)
+  38   2                      {
+  39   3                              for (a=185;a>0;a--)
+  40   3                              {
+  41   4                              }
+  42   3                      }
+  43   2              }
+  44   1      }
+  45          /***************中断设置***********************************/
+  46          void InitUART(void)
+  47          {
+  48   1              TMOD=0x20;
+  49   1              SCON=0x50;
+  50   1      /***************波特率设置*********************************/
+  51   1              TH1=0xFA;
+  52   1              TL1=TH1;
+  53   1              PCON=0x00;
+  54   1              EA=1;
+  55   1              ES=1;
+C51 COMPILER V9.53.0.0   MAIN                                                              11/16/2021 20:45:48 PAGE 2   
+
+  56   1              TR1=1;
+  57   1      }
+  58          /*************发送数据***************************************/
+  59          void Send_Uart(unsigned char value)
+  60          {
+  61   1              ES=0;
+  62   1              TI=0;
+  63   1              SBUF=value;
+  64   1              while(TI==0);
+  65   1              TI=0;
+  66   1              ES=1;
+  67   1      }
+  68          /*************接受数据***************************************/
+  69          void UARTInterrupt(void)interrupt 4
+  70          {
+  71   1              if(RI)
+  72   1              {
+  73   2                      RI=0;
+  74   2                      Usart_Receive[Usart_Cnt]=SBUF;
+  75   2                      Usart_Cnt++;
+  76   2                      if(Usart_Receive[Usart_Cnt-2]=='\r'&&Usart_Receive[Usart_Cnt-1]=='\n'&&Usart_Cnt>=2)
+  77   2                      {
+  78   3                              Usart_Cnt=0;
+  79   3                              Usart_AT_flage=1;
+  80   3                      }
+  81   2                      else if(Usart_Cnt>20)
+  82   2                      {
+  83   3                              Usart_Cnt=0;
+  84   3                      }
+  85   2              }
+  86   1      }
+  87          /*****************发送设置**********************************/
+  88          void ESP8266_Set(unsigned char *puf)
+  89          {
+  90   1          while(*puf!='\0')
+  91   1          {
+  92   2              Send_Uart(*puf);
+  93   2              puf++;
+  94   2          }
+  95   1      }
+  96          /**************设置多连*************************************/
+  97          void ManyConnect_AP()
+  98          {
+  99   1              L4=0;
+ 100   1              ESP8266_Set(RST);//返回一大溜，不用判断返回
+ 101   1          delays();
+ 102   1          delays();
+ 103   1              while(1)
+ 104   1              {
+ 105   2                      ESP8266_Set(CWMODE2);//返回ok
+ 106   2              delays();
+ 107   2              if(Usart_AT_flage ==1)
+ 108   2                      {
+ 109   3                              if(strstr(Usart_Receive, "OK") )
+ 110   3                              {
+ 111   4                                      Usart_AT_flage = 0;
+ 112   4                      L1 = 0;
+ 113   4                      break;
+ 114   4                              }
+ 115   3                      }
+ 116   2              }
+ 117   1              while (1)
+C51 COMPILER V9.53.0.0   MAIN                                                              11/16/2021 20:45:48 PAGE 3   
+
+ 118   1              {
+ 119   2                      ESP8266_Set(CIPMUX);//返回ok
+ 120   2              delays();
+ 121   2              if(Usart_AT_flage ==1)
+ 122   2                      {
+ 123   3                              if(strstr(Usart_Receive, "OK") )
+ 124   3                              {
+ 125   4                                      Usart_AT_flage = 0;
+ 126   4                      L2 = 0;
+ 127   4                      break;
+ 128   4                              }
+ 129   3                      }
+ 130   2              }
+ 131   1              while (1)
+ 132   1              {
+ 133   2                      ESP8266_Set(CIPSERVER);//返回ok，多了也返回ok
+ 134   2              delays();
+ 135   2              if(Usart_AT_flage ==1)
+ 136   2                      {
+ 137   3                              if(strstr(Usart_Receive, "OK") )
+ 138   3                              {
+ 139   4                                      Usart_AT_flage = 0;
+ 140   4                      L3 = 0;
+ 141   4                      break;
+ 142   4                              }
+ 143   3                      }
+ 144   2              }
+ 145   1      }
+ 146          /***************延时500ms***************************/
+ 147          void delays500ms(void)
+ 148          {
+ 149   1              unsigned char a,b,c;
+ 150   1          for(c=123;c>0;c--)
+ 151   1              {
+ 152   2              for(b=212;b>0;b--)
+ 153   2                      {
+ 154   3                  for(a=25;a>0;a--)
+ 155   3                              {
+ 156   4                              }
+ 157   3                      }
+ 158   2              }
+ 159   1      }
+ 160          /**************主函数**********************************/
+ 161          void main()
+ 162          {
+ 163   1              int i;
+ 164   1              P2=0x00;
+ 165   1              kaiguan=0;
+ 166   1              InitUART();
+ 167   1              while(1)
+ 168   1              {
+ 169   2                      ManyConnect_AP();
+ 170   2                      while(1)
+ 171   2                      {
+ 172   3                               //由于消息的开头是+IP  故做此判断，00000000000000000号
+ 173   3                  if((Usart_Receive[0]=='+')&&(Usart_Receive[1]=='I')&&(Usart_Receive[2]=='P'))
+ 174   3                  {
+ 175   4                      if((Usart_Receive[3]=='D')&&(Usart_Receive[6]==','))
+ 176   4                      {
+ 177   5                          if(Usart_Receive[9]=='1')
+ 178   5                          {
+ 179   6                              delays500ms();
+C51 COMPILER V9.53.0.0   MAIN                                                              11/16/2021 20:45:48 PAGE 4   
+
+ 180   6                              P2=0xFF;
+ 181   6                              delays();
+ 182   6                              for(i = 0 ; i<20; i++)
+ 183   6                              {
+ 184   7                                  Usart_Receive[i]=' ';
+ 185   7                              }
+ 186   6                                              }
+ 187   5                                              if(Usart_Receive[9]=='0')
+ 188   5                                              {
+ 189   6                                                      P2=0x00;
+ 190   6                                                      delays();
+ 191   6                                                      for(i=0;i<20;i++)
+ 192   6                                                      {
+ 193   7                                                              Usart_Receive[i]=' ';
+ 194   7                                                      }
+ 195   6                                              }
+ 196   5                                      }
+ 197   4                              }
+ 198   3                      }
+ 199   2              }
+ 200   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    448    ----
+   CONSTANT SIZE    =     73    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     21       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,66 @@
+C51 COMPILER V9.57.0.0   HR_SC                                                             06/27/2022 19:04:50 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE HR_SC
+OBJECT MODULE PLACED IN .\Objects\HR_SC.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE HR_SC.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\HR_
+                    -SC.lst) TABS(2) OBJECT(.\Objects\HR_SC.obj)
+
+line level    source
+
+   1          #include <REG52.H>
+   2          #include "HR_SC.H"
+   3          unsigned char flag;
+   4          /*蓝牙控制小车前进后腿左转右转通过按键实现*/
+   5          void Init_UART()
+   6          {
+   7   1        TMOD &= 0X00;
+   8   1        TMOD |= 0X21; //开启定时器1,采用工作方式2,8位自动重装载
+   9   1                      //开启定时器0,采用工作方式1
+  10   1        SCON = 0X50;  //串口通信采取工作方式1,REN位打开
+  11   1        PCON = 0X80;  //波特率加倍
+  12   1        TH1 = 0XFA;
+  13   1        TL1 = 0XFA;//9600 蓝牙配置好了也是这个波特率
+  14   1        ET1 = 0;
+  15   1        ES = 1;
+  16   1        EA = 1;   //开启定时器中断
+  17   1        TR1 = 1;
+  18   1      }
+  19          
+  20          void Init_Timer0()
+  21          {
+  22   1        TH0 = 0XFC;//(65535-1000)/256;
+  23   1        TL0 = 0X18;(65535-1000)%256;
+*** WARNING C275 IN LINE 23 OF HR_SC.c: expression with possibly no effect
+  24   1        
+  25   1        ET0 = 1;
+  26   1        EA = 1;
+  27   1        TR0 = 1;
+  28   1      }
+  29          void SendByte(unsigned char temp) //串口发送数据
+  30          {
+  31   1        SBUF = temp;
+  32   1        while(TI == 0);
+  33   1        TI = 0;
+  34   1      }
+  35          void HR_SC_INPUT()
+  36          {
+  37   1        flag = SBUF;    //接收手机发来的数据
+  38   1        while(RI ==0);  //等待接收完成
+  39   1        RI = 0;
+  40   1        SendByte(flag);
+  41   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     61    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

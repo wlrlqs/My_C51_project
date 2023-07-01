@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"main.obj" 
+TO "按下按键后LED灯亮（延时检测）" 
+RAMSIZE(256) 

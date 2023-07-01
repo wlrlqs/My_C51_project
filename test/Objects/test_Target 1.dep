@@ -1,0 +1,2 @@
+Dependencies for Project 'test', Target 'Target 1': (DO NOT MODIFY !)
+F (.\main.c)(0x649856D6)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections-IC:\日常\各种文档\ALL_CODE\keil5-c51\test\RTE-IC:\Keil_v5_arm\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-IC:\Keil_v5_arm\ARM\CMSIS\Include-D__UVISION_VERSION="521" -DSTM32F10X_HD-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)

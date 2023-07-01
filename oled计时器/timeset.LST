@@ -1,0 +1,157 @@
+C51 COMPILER V9.53.0.0   TIMESET                                                           11/16/2021 23:03:44 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE TIMESET
+OBJECT MODULE PLACED IN timeset.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE timeset.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          
+   2          #include "reg52.h"
+   3          //   0 0:0 0:0 0
+   4          uint a,b,c,d,e,f=0;
+*** ERROR C129 IN LINE 4 OF timeset.c: missing ';' before 'a'
+   5          void jishi()
+   6          {
+   7                  f++;
+   8                  if(f=10)
+   9                  {
+  10                          f=0;
+  11                          e++;
+  12                          if(e=6)
+  13                          {
+  14                                  e=0;
+  15                                  d++;
+  16                                  if(d=10)
+  17                                  {
+  18                                          d=0;
+  19                                          c++;
+  20                                          if((c=6)
+  21                                          {
+  22                                                  c=0;
+  23                                                  b++;
+  24                                                  if(b=6)
+  25                                                  {
+  26                                                          b=0;
+  27                                                          a++;
+  28                                                          if(a=24)
+  29                                                          {
+  30                                                                  a=0;
+  31                                                          }
+  32                                                  }
+  33                                          }
+  34                                  }
+  35                          }
+  36                  }
+  37          
+  38          switch(f)
+  39          {
+  40                  case 0:
+  41                          OLED_P8x16Str(86,2,"0");
+  42                  case 1:
+  43                          OLED_P8x16Str(86,2,"1");
+  44                  case 2:
+  45                          OLED_P8x16Str(86,2,"2");
+  46                  case 3:
+  47                          OLED_P8x16Str(86,2,"3");
+  48                  case 4:
+  49                          OLED_P8x16Str(86,2,"4");
+  50                  case 5:
+  51                          OLED_P8x16Str(86,2,"5");
+  52                  default:
+  53                          break;
+  54          }
+C51 COMPILER V9.53.0.0   TIMESET                                                           11/16/2021 23:03:44 PAGE 2   
+
+  55          switch(e)
+  56          {
+  57                  case 0:
+  58                          OLED_P8x16Str(79,2,"0");
+  59                  case 1:
+  60                          OLED_P8x16Str(79,2,"1");
+  61                  case 2:
+  62                          OLED_P8x16Str(79,2,"2");
+  63                  case 3:
+  64                          OLED_P8x16Str(79,2,"3");
+  65                  case 4:
+  66                          OLED_P8x16Str(79,2,"4");
+  67                  case 5:
+  68                          OLED_P8x16Str(79,2,"5");
+  69                  default:
+  70                          break;
+  71          }
+  72          switch(d)
+  73          {
+  74                  case 0:
+  75                          OLED_P8x16Str(65,2,"0");
+  76                  case 1:
+  77                          OLED_P8x16Str(65,2,"1");
+  78                  case 2:
+  79                          OLED_P8x16Str(65,2,"2");
+  80                  case 3:
+  81                          OLED_P8x16Str(65,2,"3");
+  82                  case 4:
+  83                          OLED_P8x16Str(65,2,"4");
+  84                  case 5:
+  85                          OLED_P8x16Str(65,2,"5");
+  86                  default:
+  87                          break;
+  88          }
+  89          switch(c)
+  90          {
+  91                  case 0:
+  92                          OLED_P8x16Str(55,2,"0");
+  93                  case 1:
+  94                          OLED_P8x16Str(55,2,"1");
+  95                  case 2:
+  96                          OLED_P8x16Str(55,2,"2");
+  97                  case 3:
+  98                          OLED_P8x16Str(55,2,"3");
+  99                  case 4:
+ 100                          OLED_P8x16Str(55,2,"4");
+ 101                  case 5:
+ 102                          OLED_P8x16Str(55,2,"5");
+ 103                  default:
+ 104                          break;
+ 105          }
+ 106          switch(b)
+ 107          {
+ 108                  case 0:
+ 109                          OLED_P8x16Str(41,2,"0");
+ 110                  case 1:
+ 111                          OLED_P8x16Str(41,2,"1");
+ 112                  case 2:
+ 113                          OLED_P8x16Str(41,2,"2");
+ 114                  case 3:
+ 115                          OLED_P8x16Str(41,2,"3");
+ 116                  case 4:
+C51 COMPILER V9.53.0.0   TIMESET                                                           11/16/2021 23:03:44 PAGE 3   
+
+ 117                          OLED_P8x16Str(41,2,"4");
+ 118                  case 5:
+ 119                          OLED_P8x16Str(41,2,"5");
+ 120                  default:
+ 121                          break;
+ 122          }
+ 123          switch(a)
+ 124          {
+ 125                  case 0:
+ 126                          OLED_P8x16Str(33,2,"0");
+ 127                  case 1:
+ 128                          OLED_P8x16Str(33,2,"1");
+ 129                  case 2:
+ 130                          OLED_P8x16Str(33,2,"2");
+ 131                  case 3:
+ 132                          OLED_P8x16Str(33,2,"3");
+ 133                  case 4:
+ 134                          OLED_P8x16Str(33,2,"4");
+ 135                  case 5:
+ 136                          OLED_P8x16Str(33,2,"5");
+ 137                  default:
+ 138                          break;
+ 139          }
+ 140          }
+ 141          
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)

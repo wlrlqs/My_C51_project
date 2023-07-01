@@ -1,0 +1,9 @@
+".\Objects\STARTUP.obj",
+".\Objects\chelun.obj",
+".\Objects\RED.obj",
+".\Objects\HR_SC.obj",
+".\Objects\main.obj",
+".\Objects\xj.obj",
+".\Objects\HCSR.obj" 
+TO ".\Objects\51" 
+PRINT(".\Listings\51.m51") RAMSIZE(256) 

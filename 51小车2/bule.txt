@@ -1,0 +1,65 @@
+/*蓝牙控制小车*/
+#include <REG52.H>
+#include "HR_SC.H"
+#include "RED.H"
+#include "CHELUN.H"
+
+sbit BEEP = P1^6;
+extern unsigned char flag;
+extern unsigned char Left_Speed_Ratio;  	//电机转速设定
+extern unsigned char Right_Speed_Ratio;
+extern unsigned char pwm_val_left;
+extern unsigned char pwm_val_right;
+
+void Add_Speed_Ratio()	//调速函数
+{
+		Left_Speed_Ratio++;
+		Right_Speed_Ratio++;
+}
+void Remine_Speed_Ratio()	//调速函数
+{
+		Left_Speed_Ratio--;
+		Right_Speed_Ratio--;
+}
+
+
+int main()
+{
+	Init_UART();
+	Init_Timer0();
+	while(1)
+	{
+		switch (flag)
+		{		
+		case 'A':Add_Speed_Ratio();break;	//加速
+		case 'B':Remine_Speed_Ratio();break;//减速
+		case 'G':GoStright();break;//前进
+		case 'K':GoBack();break;//后退
+		case 'H':TurnLeft();break;//左转
+		case 'J':TurnRight();break;//右转
+		case 'I':beep_ring();Stop();break;//停止
+		}
+	}
+}
+void UART_ser() interrupt 4
+{
+	HR_SC_INPUT();
+}
+void Timer0_ser () interrupt 1
+{
+	TH0 = (65535-1000)/256;
+	TL0 = (65535-1000)%256;
+
+	pwm_val_left++;
+	pwm_val_right++;
+	pwm_out_left_moto();
+	pwm_out_right_moto();
+}
+//		switch (flag)	//蓝牙发送按键测试
+//		{
+//		case 'G':P2 = 0XFE;break;//前进
+//		case 'K':P2 = 0XFD;break;//后退
+//		case 'H':P2 = 0XFB;break;//左转
+//		case 'J':P2 = 0XF7;break;//右转
+//		case 'I':P2 = 0XEF;break;//停止
+

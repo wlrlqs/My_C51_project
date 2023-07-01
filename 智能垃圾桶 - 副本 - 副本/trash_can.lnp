@@ -1,0 +1,7 @@
+"STARTUP.obj",
+"main.obj",
+"stepper_motor_5L4P.obj",
+"timer2.obj",
+"timer1.obj" 
+TO "trash_can" 
+RAMSIZE(256) 

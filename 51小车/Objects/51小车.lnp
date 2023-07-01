@@ -1,0 +1,10 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj",
+".\Objects\pwm_out_moto.obj",
+".\Objects\delay1s.obj",
+".\Objects\HC.obj",
+".\Objects\steer.obj",
+".\Objects\follow the trail.obj",
+".\Objects\buletooth.obj" 
+TO ".\Objects\51小车" 
+PRINT(".\Listings\51小车.m51") RAMSIZE(256) 

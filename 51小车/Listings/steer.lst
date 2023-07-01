@@ -1,0 +1,56 @@
+C51 COMPILER V9.57.0.0   STEER                                                             06/27/2022 15:18:52 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE STEER
+OBJECT MODULE PLACED IN .\Objects\steer.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE steer.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\ste
+                    -er.lst) TABS(2) OBJECT(.\Objects\steer.obj)
+
+line level    source
+
+   1          #include "car.h"
+   2          
+   3          void steer()
+   4          {
+   5   1        
+   6   1        if(L_led==1&&R_led==1)
+   7   1        {
+   8   2          run();
+   9   2        }
+  10   1        else
+  11   1        {
+  12   2          if(L_led==0&&R_led==0)
+  13   2          {
+  14   3            back();
+  15   3          }
+  16   2          else
+  17   2          {
+  18   3            if(L_led==1&&R_led==0)
+  19   3            {
+  20   4              left();
+  21   4            }
+  22   3            else
+  23   3            {
+  24   4              if(L_led==0&&R_led==1)
+  25   4              {
+  26   5                right();
+  27   5              }
+  28   4            }
+  29   3          }
+  30   2        }
+  31   1        
+  32   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     37    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

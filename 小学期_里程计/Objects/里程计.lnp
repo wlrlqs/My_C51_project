@@ -1,0 +1,9 @@
+".\Objects\main.obj",
+".\Objects\UsartInit.obj",
+".\Objects\OLED12864.obj",
+".\Objects\motor.obj",
+".\Objects\key_scan.obj",
+".\Objects\Conf_tny.obj",
+".\RTOS\RTX51TNY.LIB" 
+TO ".\Objects\里程计" Rtx51Tiny 
+PRINT(".\Listings\里程计.m51") RAMSIZE(256) 

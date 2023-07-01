@@ -1,0 +1,77 @@
+C51 COMPILER V9.57.0.0   HC                                                                06/27/2022 20:43:10 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE HC
+OBJECT MODULE PLACED IN .\Objects\HC.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE HC.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\HC.lst
+                    -) TABS(2) OBJECT(.\Objects\HC.obj)
+
+line level    source
+
+   1          #include <car.h>
+   2          
+   3          float  S=0;
+   4          extern bit  flag;
+   5          unsigned int  measure_time;
+   6          char M_sensor; 
+   7           void  StartModule()             //启动超声波模块
+   8            {
+   9   1          Trig=1;                     
+  10   1          _nop_(); 
+  11   1          _nop_(); 
+  12   1          _nop_(); 
+  13   1          _nop_(); 
+  14   1          _nop_(); 
+  15   1          _nop_(); 
+  16   1          _nop_(); 
+  17   1          _nop_(); 
+  18   1          _nop_(); 
+  19   1          _nop_(); 
+  20   1          _nop_(); 
+  21   1          _nop_(); 
+  22   1          _nop_(); 
+  23   1          _nop_(); 
+  24   1          _nop_(); 
+  25   1          _nop_(); 
+  26   1          _nop_();
+  27   1          _nop_(); 
+  28   1          _nop_(); 
+  29   1          _nop_(); 
+  30   1          _nop_();
+  31   1          Trig=0;
+  32   1        }
+  33            
+  34           void Conut(void)
+  35            {
+  36   1         measure_time=TH1*256+TL1;
+  37   1         TH1=0;
+  38   1         TL1=0;
+  39   1         S=(measure_time*1.87)/100;     //算出来是CM
+  40   1         if(flag==1||S>50||S<2)       //超出测量
+  41   1         {
+  42   2          flag=0;
+  43   2         LED=1;
+  44   2         M_sensor=1;
+  45   2         }
+  46   1         else
+  47   1           {
+  48   2         LED=0;
+  49   2         M_sensor=0;
+  50   2           }
+  51   1        }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.57.0.0   HC                                                                06/27/2022 20:43:10 PAGE 2   
+
+   CODE SIZE        =    141    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      7    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

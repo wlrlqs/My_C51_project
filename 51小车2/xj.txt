@@ -1,0 +1,37 @@
+/*
+循迹的main函数,主要实现循迹功能
+*/
+#include <REG52.H>
+#include "CheLun.h"
+#include "RED.h"
+extern unsigned char pwm_val_left;
+extern unsigned char pwm_val_right;
+void Init_Timer0()
+{
+	TMOD = 0X01;
+	TH0 = (65535-1000)/256;
+	TL0 = (65535-1000)%256;
+	
+	ET0 = 1;
+	EA = 1;
+	TR0 = 1;
+}
+int main()
+{
+	Init_Timer0();
+	while(1)
+	{
+		xj_Run();	
+	}
+}
+void Timer0_ser () interrupt 1
+{
+	TH0 = (65535-1000)/256;
+	TL0 = (65535-1000)%256;
+
+	pwm_val_left++;
+	pwm_val_right++;
+	
+	pwm_out_left_moto();
+	pwm_out_right_moto();
+}

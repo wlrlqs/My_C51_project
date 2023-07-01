@@ -1,0 +1,204 @@
+C51 COMPILER V9.60.0.0   MOTOR                                                             06/30/2023 01:45:47 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MOTOR
+OBJECT MODULE PLACED IN .\Objects\motor.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE Application\motor.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRIN
+                    -T(.\Listings\motor.lst) TABS(2) OBJECT(.\Objects\motor.obj)
+
+line level    source
+
+   1          /********************
+   2          接线方式:
+   3          IN1 ---- P23
+   4          IN2 ---- P22
+   5          IN3 ---- P21
+   6          IN4 ---- P20
+   7          *********************/
+   8          #include <reg52.h>
+   9          #include "motor.h"
+  10          #include <rtx51tny.h>
+  11          #define uchar unsigned char
+  12          #define uint  unsigned int
+  13          #define MotorData P2                    //步进电机控制接口定义
+  14          #define LED P1
+  15          sbit motor_scan = P2^7;
+  16          #define weight 2//遮挡长度
+  17          float timer = 0;
+  18          //引用外部变量
+  19          extern float w_speed,w_distance,ws_distance;
+  20          extern unsigned char led_speed[4];
+  21          extern int speed_choose;
+  22          //内部变量定义
+  23          unsigned int speed_delay = 0,motor_task_loop = 0,scan_last = 0,cw_ccw_flag = 0;
+  24          float speed_count_delay = 0;
+  25          uchar phasecw[4] ={0xF1,0xF2,0xF4,0xF8};//正转 电机导通相序 D-C-B-A
+  26          uchar phaseccw[4]={0xF8,0xF4,0xF2,0xF1};//反转 电机导通相序 A-B-C-D
+  27          
+  28          /****************************************************
+  29          函 数 名：Delay_xms
+  30          功    能：软件延时
+  31          入口参数：uint x
+  32          返 回 值：无
+  33          应用范围：延时
+  34          备    注：
+  35          *****************************************************/
+  36          void Delay_xms(uint x){
+  37   1       uint i,j;
+  38   1       for(i=0;i<x;i++)
+  39   1        for(j=0;j<112;j++);
+  40   1      }
+  41          
+  42          /****************************************************
+  43          函 数 名：MotorCW
+  44          功    能：步进电机顺时针转动
+  45          入口参数：无
+  46          返 回 值：无
+  47          应用范围：电机控制
+  48          备    注：
+  49          *****************************************************/
+  50          void MotorCW(void){
+  51   1       uchar i;
+  52   1       for(i=0;i<4;i++){
+  53   2         loops_count();
+  54   2         MotorData=phasecw[i];
+C51 COMPILER V9.60.0.0   MOTOR                                                             06/30/2023 01:45:47 PAGE 2   
+
+  55   2         os_wait2(K_TMO,speed_delay);
+  56   2        }
+  57   1      }
+  58          
+  59          /****************************************************
+  60          函 数 名：MotorCCW
+  61          功    能：步进电机逆时针转动
+  62          入口参数：无
+  63          返 回 值：无
+  64          应用范围：电机控制
+  65          备    注：
+  66          *****************************************************/
+  67          void MotorCCW(void){
+  68   1       uchar i;
+  69   1       for(i=0;i<4;i++){
+  70   2         loops_count();
+  71   2         MotorData=phaseccw[i];
+  72   2         os_wait2(K_TMO,speed_delay);
+  73   2        }
+  74   1      }
+  75          
+  76          /****************************************************
+  77          函 数 名：MotorStop
+  78          功    能：步进电机停止转动
+  79          入口参数：无
+  80          返 回 值：无
+  81          应用范围：电机控制
+  82          备    注：
+  83          *****************************************************/
+  84          void MotorStop(void){
+  85   1       MotorData=MotorData=(MotorData & 0xF0);
+  86   1      }
+  87          /****************************************************
+  88          函 数 名：loops_count
+  89          功    能：电机控制loop计算
+  90          入口参数：无
+  91          返 回 值：无
+  92          应用范围：用于led显示电机相位状态，取1 / 13分频
+  93          备    注：
+  94          *****************************************************/
+  95          void loops_count(void){
+  96   1        motor_speed_fbd();
+  97   1        motor_task_loop++;
+  98   1        if(motor_task_loop == 1000){
+  99   2          motor_task_loop = 0; 
+ 100   2        }
+ 101   1         if(motor_task_loop % 13 == 0){
+ 102   2          LED = P2 & led_speed[speed_choose];
+ 103   2         }
+ 104   1      }
+ 105          
+ 106          /****************************************************
+ 107          函 数 名：motor_speed_fbd
+ 108          功    能：电机速度检测
+ 109          入口参数：无
+ 110          返 回 值：无
+ 111          应用范围：电机速度检测
+ 112          备    注：
+ 113          *****************************************************/
+ 114          
+ 115          void motor_speed_fbd(void){//timer = 9ms * 0.65 = 0.00675s
+ 116   1        w_distance += w_speed * speed_count_delay;
+C51 COMPILER V9.60.0.0   MOTOR                                                             06/30/2023 01:45:47 PAGE 3   
+
+ 117   1        if(motor_scan){
+ 118   2          timer += speed_count_delay;
+ 119   2          scan_last = 1;
+ 120   2        }else if(!motor_scan && scan_last){
+ 121   2          w_speed = weight / timer;
+ 122   2          scan_last = 0;
+ 123   2          timer = 0;
+ 124   2        }
+ 125   1      }
+ 126          
+ 127          /****************************************************
+ 128          函 数 名：motor_speed_choose
+ 129          功    能：电机速度选择
+ 130          入口参数：无
+ 131          返 回 值：无
+ 132          应用范围：电机速度控制
+ 133          备    注：
+ 134          *****************************************************/
+ 135          void motor_speed_choose(void){
+ 136   1        switch (speed_choose){
+ 137   2              case 0:
+ 138   2                speed_delay = 8;
+ 139   2                speed_count_delay = 0.009;
+ 140   2                //w_speed = 4.16;
+ 141   2                break;
+ 142   2              case 1:
+ 143   2                speed_delay = 4;
+ 144   2                speed_count_delay = 0.0054;
+ 145   2                //w_speed = 12.5;
+ 146   2                break;
+ 147   2              case 2:
+ 148   2                speed_delay = 2;
+ 149   2                speed_count_delay = 0.00324;
+ 150   2                //w_speed = 19.44;
+ 151   2                break;
+ 152   2              case 3:
+ 153   2                speed_delay = 1;
+ 154   2                speed_count_delay = 0.00310;
+ 155   2                //w_speed = 33.33;
+ 156   2                break;
+ 157   2        }
+ 158   1      }
+ 159          
+ 160          /****************************************************
+ 161          函 数 名：motor_control
+ 162          功    能：电机控制主函数
+ 163          入口参数：无
+ 164          返 回 值：无
+ 165          应用范围：电机控制任务
+ 166          备    注：
+ 167          *****************************************************/
+ 168          void motor_control(void){
+ 169   1        if(!cw_ccw_flag){
+ 170   2          MotorCW();   //顺时针转动
+ 171   2        }else {
+ 172   2          MotorCCW();   //逆时针转动
+ 173   2        } 
+ 174   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    409    ----
+C51 COMPILER V9.60.0.0   MOTOR                                                             06/30/2023 01:45:47 PAGE 4   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     24       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

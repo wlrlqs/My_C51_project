@@ -1,0 +1,161 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              06/27/2022 20:46:42 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <car.h>
+   2          
+   3          extern unsigned char Left_Speed_Ratio;
+   4          extern unsigned char Right_Speed_Ratio;
+   5          unsigned int time=0; 
+   6          unsigned int HC_SR04_time=0;
+   7          extern unsigned char pwm_val_left;
+   8          extern unsigned char pwm_val_right;
+   9           bit   flag =0;
+  10          unsigned  flag1 =0;
+  11           unsigned   flag2 =0;
+  12           unsigned   k =0;
+  13          extern char M_sensor;  
+  14           
+  15          int delay1s(int i)   
+  16          {
+  17   1        for(i;i>=0;i--)
+  18   1        {
+  19   2          unsigned char a,b,c;
+  20   2          for(c=167;c>0;c--)
+  21   2              for(b=171;b>0;b--)
+  22   2                  for(a=16;a>0;a--);
+  23   2          _nop_();  
+  24   2        }
+  25   1      }
+  26          int delay1ms(int i)   
+  27          {
+  28   1        for(i;i>=0;i--)
+  29   1        {
+  30   2          unsigned char a,b,c;
+  31   2          for(c=1;c>0;c--)
+  32   2              for(b=142;b>0;b--)
+  33   2                  for(a=2;a>0;a--);
+  34   2        }
+  35   1      }
+  36          
+  37          void Timer0Init()
+  38          {
+  39   1        TMOD|=0X01;//选择为定时器0模式，工作方式1，仅用TR0打开启动。
+  40   1      
+  41   1        TH0=0XFC; //给定时器赋初值，定时1ms
+  42   1        TL0=0X18; 
+  43   1        ET0=1;//打开定时器0中断允许
+  44   1        EA=1;//打开总中断
+  45   1        TR0=1;//打开定时器     
+  46   1      }
+  47          
+  48          void Timer1Init()
+  49          {
+  50   1        TMOD|=0X10;//选择为定时器1模式，工作方式1，仅用TR1打开启动。
+  51   1        TH1=0;  
+  52   1        TL1=0;  
+  53   1        ET1=1;//打开定时器1中断允许
+  54   1        EA=1;//打开总中断
+C51 COMPILER V9.57.0.0   MAIN                                                              06/27/2022 20:46:42 PAGE 2   
+
+  55   1        TR1=0;//打开定时器     
+  56   1      }
+  57          
+  58          void timer0()interrupt 1 using 2 
+  59          { 
+  60   1      TH0=0XFC; //给定时器赋初值，定时1ms
+  61   1      TL0=0X18;
+  62   1      time++; 
+  63   1      pwm_val_left++; 
+  64   1      pwm_val_right++; 
+  65   1      pwm_out_left_moto(); 
+  66   1      pwm_out_right_moto();   
+  67   1      HC_SR04_time++;
+  68   1      if(HC_SR04_time>=100)   //100ms 启动一次超声波测距
+  69   1      {
+  70   2        
+  71   2        HC_SR04_time=0;
+  72   2        StartModule();
+  73   2      }
+  74   1      } 
+  75          void Timer1() interrupt 3
+  76          {
+  77   1        flag=1;    //若定时器1溢出则flag置1
+  78   1      }
+  79          
+  80          
+  81          void follow(void)
+  82          {
+  83   1        while(1)
+  84   1          {
+  85   2            if(Echo==1)
+  86   2              {
+  87   3              TH1=0;  
+  88   3              TL1=0;
+  89   3              TR1=1;          //开启计数  
+  90   3              while(Echo);      //当RX为1计数并等待  
+  91   3              TR1=0;        //关闭计数  
+  92   3              Conut();      //计算    
+  93   3            }
+  94   2              
+  95   2              if(M_sensor==0)
+  96   2              {
+  97   3                stop();
+  98   3        
+  99   3              }
+ 100   2              else{
+ 101   3                while(M_sensor==1)
+ 102   3                {
+ 103   4                  run();
+ 104   4                  if(Echo==1)
+ 105   4              {
+ 106   5              TH1=0;  
+ 107   5              TL1=0;
+ 108   5              TR1=1;          //开启计数  
+ 109   5              while(Echo);      //当RX为1计数并等待  
+ 110   5              TR1=0;        //关闭计数  
+ 111   5              Conut();      //计算    
+ 112   5            }
+ 113   4                }
+ 114   3              }     
+ 115   2          }
+ 116   1                
+C51 COMPILER V9.57.0.0   MAIN                                                              06/27/2022 20:46:42 PAGE 3   
+
+ 117   1      }
+ 118          
+ 119          void main(){
+ 120   1      
+ 121   1      Timer0Init();
+ 122   1        Timer1Init(); 
+ 123   1        Left_Speed_Ratio=4;   //设置左电机车速为最大车速的40%
+ 124   1        Right_Speed_Ratio=4;  //设置右电机车速为最大车速的40%
+ 125   1            run();
+ 126   1          while(1)
+ 127   1          {
+ 128   2            follow();
+ 129   2          }
+ 130   1      }
+ 131            
+*** WARNING C290 IN LINE 25 OF main.c: missing return value
+*** WARNING C290 IN LINE 35 OF main.c: missing return value
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    252    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     10       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,54 @@
+C51 COMPILER V9.57.0.0   RED                                                               06/27/2022 19:04:50 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE RED
+OBJECT MODULE PLACED IN .\Objects\RED.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE RED.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\RED.l
+                    -st) TABS(2) OBJECT(.\Objects\RED.obj)
+
+line level    source
+
+   1          //输出端子接单片机的io口,有遮挡输出0,无遮挡输出1*/
+   2          #include <REG52.H>
+   3          #include "RED.H"
+   4          
+   5          //检测灯
+   6          unsigned LED1=0;
+   7          sbit Left_led = P3^7;
+   8          sbit Right_led = P3^6;
+   9          
+  10          //感应到黑线 指示灯灭 输出1 没感应到黑线 指示灯亮 输出0
+  11          void xj_Run()
+  12          {
+  13   1        //碰到黑线为1,没碰到黑线为0
+  14   1        if(Left_led == 0 && Right_led==1) //右边碰到黑线
+  15   1        {
+  16   2          TurnLeft();//左转
+*** WARNING C206 IN LINE 16 OF RED.c: 'TurnLeft': missing function-prototype
+  17   2        }
+  18   1        if(Left_led == 1 && Right_led==0)//左边碰到黑线
+  19   1        {
+  20   2           TurnRight();//右转
+*** WARNING C206 IN LINE 20 OF RED.c: 'TurnRight': missing function-prototype
+  21   2        }
+  22   1        if(Left_led ==0 && Right_led==0)//没有碰到
+  23   1        {
+  24   2           GoStright();//前进
+*** WARNING C206 IN LINE 24 OF RED.c: 'GoStright': missing function-prototype
+  25   2        }
+  26   1      
+  27   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     28    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

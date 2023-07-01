@@ -1,0 +1,145 @@
+C51 COMPILER V9.60.0.0   DISPLAY                                                           10/25/2022 23:11:05 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE DISPLAY
+OBJECT MODULE PLACED IN .\Objects\display.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE display.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listin
+                    -gs\display.lst) TABS(2) OBJECT(.\Objects\display.obj)
+
+line level    source
+
+   1          #include <regx52.h>
+   2          #include <stdio.h>
+   3          #include <stdlib.h>
+   4          sbit LSA=P2^2;  //74HC138译码器端口
+   5          sbit LSB=P2^3;
+   6          sbit LSC=P2^4;
+   7          unsigned char out[18]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71,0x0
+             -0,0x40};
+   8          void delay1(unsigned int  ms)
+   9          {
+  10   1        unsigned char i;
+  11   1        while(ms--)
+  12   1          for(i=0;i<1;i++);
+  13   1      }
+  14          void display(int j,int d)
+  15          {
+  16   1          switch(j)  //位选，选择点亮的数码管，
+  17   1          {
+  18   2            case(7):
+  19   2              LSA=0;LSB=0;LSC=0; break;//显示第0位
+  20   2            case(6):
+  21   2              LSA=1;LSB=0;LSC=0; break;//显示第1位
+  22   2            case(5):
+  23   2              LSA=0;LSB=1;LSC=0; break;//显示第2位
+  24   2            case(4):
+  25   2              LSA=1;LSB=1;LSC=0; break;//显示第3位
+  26   2            case(3):
+  27   2              LSA=0;LSB=0;LSC=1; break;//显示第4位
+  28   2            case(2):
+  29   2              LSA=1;LSB=0;LSC=1; break;//显示第5位
+  30   2            case(1):
+  31   2              LSA=0;LSB=1;LSC=1; break;//显示第6位
+  32   2            case(0):
+  33   2              LSA=1;LSB=1;LSC=1; break;//显示第7位  
+  34   2          }
+  35   1          P0=out[d];//发送段码
+  36   1          delay1(10); //间隔一段时间扫描  
+  37   1          P0=0x00;//消隐
+  38   1      }
+  39          int swap(unsigned char da){
+  40   1      int k;
+  41   1      switch(da){
+  42   2            case('0'):
+  43   2              k = 0;break;
+  44   2            case('1'):
+  45   2              k = 1;break;
+  46   2            case('2'):
+  47   2              k = 2;break;
+  48   2            case('3'):
+  49   2              k = 3;break;
+  50   2            case('4'):
+  51   2              k = 4;break;
+  52   2            case('5'):
+  53   2              k = 5;break;
+C51 COMPILER V9.60.0.0   DISPLAY                                                           10/25/2022 23:11:05 PAGE 2   
+
+  54   2            case('6'):
+  55   2              k = 6;break;
+  56   2            case('7'):
+  57   2              k = 7;break;
+  58   2            case('8'):
+  59   2              k = 8;break;
+  60   2            case('9'):
+  61   2              k = 9;break;  
+  62   2          }
+  63   1        return k;
+  64   1      }
+  65          void displayinit(unsigned char da[5]){
+  66   1        unsigned int k;
+  67   1        display(0,10);
+  68   1        display(1,8);
+  69   1        display(2,8);
+  70   1        k = swap(da[1]);
+  71   1        display(3,k);
+  72   1        k = swap(da[2]);
+  73   1        display(4,k);
+  74   1        display(5,17);
+  75   1        k = swap(da[3]);
+  76   1        display(6,k);
+  77   1        k = swap(da[4]);
+  78   1        display(7,k);
+  79   1      }
+  80          void displayleast(int Timeleast_s){
+  81   1        int D4 = (Timeleast_s%60)%10;
+  82   1        int D3 = (Timeleast_s%60 - D4)/10;
+  83   1        int D2 = (Timeleast_s/60)%10;
+  84   1        int D1 = Timeleast_s/600;
+  85   1        
+  86   1        if(D1 < 0){
+  87   2          D1 = 0;
+  88   2        }
+  89   1        if(D2 < 0){
+  90   2          D2 = 0;
+  91   2        }
+  92   1        if(D3 < 0){
+  93   2          D3 = 0;
+  94   2        }
+  95   1        if(D4 < 0){
+  96   2          D4 = 0;
+  97   2        }
+  98   1        display(0,11);
+  99   1        display(1,8);
+ 100   1        display(2,8);
+ 101   1        display(3,D1);
+ 102   1        display(4,D2);
+ 103   1        display(5,17);
+ 104   1        display(6,D3);
+ 105   1        display(7,D4);
+ 106   1      }
+ 107          void displayover(){
+ 108   1        display(0,6);
+ 109   1        display(1,6);
+ 110   1        display(2,6);
+ 111   1        display(3,6);
+ 112   1        display(4,6);
+ 113   1        display(5,6);
+ 114   1        display(6,6);
+ 115   1        display(7,6);
+C51 COMPILER V9.60.0.0   DISPLAY                                                           10/25/2022 23:11:05 PAGE 3   
+
+ 116   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    680    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     18      13
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

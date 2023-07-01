@@ -1,0 +1,190 @@
+C51 COMPILER V9.53.0.0   MAIN                                                              05/17/2022 00:37:10 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #define uint unsigned int
+   3          #define uchar unsigned char
+   4          sbit beep = P2^5;
+   5          sbit happy = P3^1;
+   6          sbit sa = P3^0;
+   7          sbit LSA=P2^2;
+   8          sbit LSB=P2^3;
+   9          sbit LSC=P2^4;
+  10          #define SMG P0
+  11          unsigned char num_code[18]={0x00,0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x7
+             -9,0x71};
+  12          uchar code happybirthday_SONG_TONE[]={212,212,190,212,159,169,212,212,190,212,142,159,
+  13          212,212,106,126,159,169,190,119,119,126,159,142,159,0};
+  14          
+  15          uchar code happybirthday_SONG_LONG[]={9,3,12,12,12,24,9,3,12,12,12,24,
+  16          9,3,12,12,12,12,12,9,3,12,12,12,24,0};
+  17          
+  18          //延时
+  19          void DelayMS(uint x)
+  20          {
+  21   1      uchar t;
+  22   1      while(x--) for(t=0;t<120;t++);
+  23   1      }
+  24          
+  25          void PlayMusic()
+  26          {
+  27   1      uint i=0,j,k;
+  28   1      while(happybirthday_SONG_LONG[i]!=0||happybirthday_SONG_TONE[i]!=0)
+  29   1      { //播放各个音符，SONG_LONG 为拍子长度
+  30   2          for(j=0;j<happybirthday_SONG_LONG[i]*20;j++)
+  31   2      {
+  32   3          beep=~beep;
+  33   3      //SONG_TONE 延时表决定了每个音符的频率
+  34   3          for(k=0;k<happybirthday_SONG_TONE[i]/3;k++);
+  35   3      }
+  36   2          DelayMS(10);
+  37   2          i++;
+  38   2      }
+  39   1      }
+  40          void happybirthday()
+  41          {
+  42   1              PlayMusic(); //播放生日快乐
+  43   1      DelayMS(500); //播放完后暂停一段时间
+  44   1      }
+  45          /*祝你平安*/  
+  46          /*******************************************/
+  47          
+  48          unsigned char Count;
+  49          sbit _Speak =P2^5 ;
+  50          unsigned char code SONG[] ={      //祝你平安
+  51          0x26,0x20,0x20,0x20,0x20,0x20,0x26,0x10,0x20,0x10,0x20,0x80,0x26,0x20,0x30,0x20,
+  52          0x30,0x20,0x39,0x10,0x30,0x10,0x30,0x80,0x26,0x20,0x20,0x20,0x20,0x20,0x1c,0x20,
+  53          0x20,0x80,0x2b,0x20,0x26,0x20,0x20,0x20,0x2b,0x10,0x26,0x10,0x2b,0x80,0x26,0x20,
+  54          0x30,0x20,0x30,0x20,0x39,0x10,0x26,0x10,0x26,0x60,0x40,0x10,0x39,0x10,0x26,0x20,
+C51 COMPILER V9.53.0.0   MAIN                                                              05/17/2022 00:37:10 PAGE 2   
+
+  55          0x30,0x20,0x30,0x20,0x39,0x10,0x26,0x10,0x26,0x80,0x26,0x20,0x2b,0x10,0x2b,0x10,
+  56          0x2b,0x20,0x30,0x10,0x39,0x10,0x26,0x10,0x2b,0x10,0x2b,0x20,0x2b,0x40,0x40,0x20,
+  57          0x20,0x10,0x20,0x10,0x2b,0x10,0x26,0x30,0x30,0x80,0x18,0x20,0x18,0x20,0x26,0x20,
+  58          0x20,0x20,0x20,0x40,0x26,0x20,0x2b,0x20,0x30,0x20,0x30,0x20,0x1c,0x20,0x20,0x20,
+  59          0x20,0x80,0x1c,0x20,0x1c,0x20,0x1c,0x20,0x30,0x20,0x30,0x60,0x39,0x10,0x30,0x10,
+  60          0x20,0x20,0x2b,0x10,0x26,0x10,0x2b,0x10,0x26,0x10,0x26,0x10,0x2b,0x10,0x2b,0x80,
+  61          0x18,0x20,0x18,0x20,0x26,0x20,0x20,0x20,0x20,0x60,0x26,0x10,0x2b,0x20,0x30,0x20,
+  62          0x30,0x20,0x1c,0x20,0x20,0x20,0x20,0x80,0x26,0x20,0x30,0x10,0x30,0x10,0x30,0x20,
+  63          0x39,0x20,0x26,0x10,0x2b,0x10,0x2b,0x20,0x2b,0x40,0x40,0x10,0x40,0x10,0x20,0x10,
+  64          0x20,0x10,0x2b,0x10,0x26,0x30,0x30,0x80,0x00};
+  65          
+  66          void Time0_Init()
+  67          {
+  68   1       TMOD = 0x01;
+  69   1       IE   = 0x82;
+  70   1       TH0  = 0xD8;
+  71   1       TL0  = 0xEF;  //12MZ晶振，10ms
+  72   1      }
+  73          
+  74          void Time0_Int() interrupt 1
+  75          {
+  76   1       TH0 = 0xD8;
+  77   1       TL0 = 0xEF;
+  78   1       Count++;   //长度加1
+  79   1      }
+  80          
+  81          /*-------------------------------------------------
+  82          功能:1MS延时子程序
+  83          -------------------------------------------------*/
+  84          void Delay_xMs(unsigned int x)
+  85          {
+  86   1          unsigned int i,j;
+  87   1          for( i =0;i < x;i++ )
+  88   1          {
+  89   2              for( j =0;j<3;j++ );
+  90   2          }
+  91   1      }
+  92          
+  93          void safe(unsigned char i)
+  94          {
+  95   1       unsigned char Temp1,Temp2;
+  96   1       unsigned int Addr;
+  97   1       Count = 0;      //中断计数器清0
+  98   1       Addr = i * 217;
+  99   1       while(1)
+ 100   1       {
+ 101   2        Temp1 = SONG[Addr++];
+ 102   2           if ( Temp1 == 0xFF )          //休止符
+ 103   2           {
+ 104   3            TR0 = 0;
+ 105   3            Delay_xMs(100);
+ 106   3           }
+ 107   2           else if ( Temp1 == 0x00 )   //歌曲结束符
+ 108   2           {
+ 109   3            return;
+ 110   3           }
+ 111   2           else
+ 112   2           {
+ 113   3            Temp2 = SONG[Addr++];
+ 114   3            TR0 = 1;
+ 115   3           while(1)
+ 116   3           {
+C51 COMPILER V9.53.0.0   MAIN                                                              05/17/2022 00:37:10 PAGE 3   
+
+ 117   4             _Speak = ~_Speak;
+ 118   4             Delay_xMs(Temp1);
+ 119   4             if ( Temp2 == Count )
+ 120   4             {
+ 121   5              Count = 0;
+ 122   5              break;
+ 123   5             }
+ 124   4            }
+ 125   3           }
+ 126   2       }
+ 127   1      }
+ 128          void smg_switch(int x)//位选到第x个数码管
+ 129          {
+ 130   1              x=8-x;
+ 131   1              LSA=x%2;
+ 132   1              x=x/2;
+ 133   1              LSB=x%2;
+ 134   1              x=x/2;
+ 135   1              LSC=x%2;
+ 136   1      }
+ 137          void main()
+ 138          {
+ 139   1              Time0_Init();   //定时器0中断初始化
+ 140   1      
+ 141   1              smg_switch(1);
+ 142   1              SMG=num_code[0];
+ 143   1      
+ 144   1       while(1)
+ 145   1       {
+ 146   2              if(happy==0)
+ 147   2              {       
+ 148   3                      SMG=num_code[1+1];
+ 149   3                      happybirthday();
+ 150   3                      SMG=num_code[0];
+ 151   3              }
+ 152   2              if(sa==0)
+ 153   2              {
+ 154   3                      SMG=num_code[2+1];
+ 155   3                      EA=1;
+ 156   3                      safe();
+*** WARNING C209 IN LINE 156 OF main.c: '_safe': too few actual parameters
+ 157   3                      EA=0;
+ 158   3                      SMG=num_code[0];        
+ 159   3              }
+ 160   2       }
+ 161   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    440    ----
+   CONSTANT SIZE    =    269    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     19       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

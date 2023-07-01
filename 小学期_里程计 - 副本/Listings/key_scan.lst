@@ -1,0 +1,28 @@
+C51 COMPILER V9.60.0.0   KEY_SCAN                                                          06/29/2023 12:10:41 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE KEY_SCAN
+OBJECT MODULE PLACED IN .\Objects\key_scan.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE key_scan.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listi
+                    -ngs\key_scan.lst) TABS(2) OBJECT(.\Objects\key_scan.obj)
+
+line level    source
+
+   1          #include <rtx51tny.h>
+   2          #include <reg52.h>
+   3          #include <stdio.h>
+   4          #include "key_scan.h"
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

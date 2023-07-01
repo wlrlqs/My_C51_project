@@ -1,0 +1,106 @@
+C51 COMPILER V9.60.0.0   MOTOR                                                             06/29/2023 12:10:41 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MOTOR
+OBJECT MODULE PLACED IN .\Objects\motor.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE Application\motor.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRIN
+                    -T(.\Listings\motor.lst) TABS(2) OBJECT(.\Objects\motor.obj)
+
+line level    source
+
+   1          /*******************************************************
+   2          接线方式:
+   3          IN1 ---- P23
+   4          IN2 ---- P22
+   5          IN3 ---- P21
+   6          IN4 ---- P20
+   7          *********************/
+   8          #include <reg52.h>
+   9          #include "motor.h"
+  10          #include <rtx51tny.h>
+  11          #define uchar unsigned char
+  12          #define uint  unsigned int
+  13          #define MotorData P2                    //步进电机控制接口定义
+  14          #define LED P1
+  15          sbit M_1 = P2^3;
+  16          sbit M_2 = P2^2;
+  17          sbit M_3 = P2^1;
+  18          sbit M_4 = P2^0;
+  19          extern unsigned char led_speed[4];
+  20          unsigned int speed_delay = 0,motor_task_loop = 0;
+  21          extern int speed_choose;
+  22          uchar phasecw[4] ={0xF8,0xF4,0xF2,0xF1};//正转 电机导通相序 D-C-B-A
+  23          uchar phaseccw[4]={0xF1,0xF2,0xF4,0xF8};//反转 电机导通相序 A-B-C-D
+  24          //ms延时函数
+  25          void Delay_xms(uint x){
+  26   1       uint i,j;
+  27   1       for(i=0;i<x;i++)
+  28   1        for(j=0;j<112;j++);
+  29   1      }
+  30          //顺时针转动
+  31          void MotorCW(void){
+  32   1       uchar i;
+  33   1       for(i=0;i<4;i++){
+  34   2         loops_count();
+  35   2         MotorData=phasecw[i];
+  36   2         os_wait2(K_TMO,speed_delay);
+  37   2        }
+  38   1      }
+  39          //逆时针转动
+  40          void MotorCCW(void){
+  41   1       uchar i;
+  42   1       for(i=0;i<4;i++){
+  43   2         loops_count();
+  44   2         MotorData=phaseccw[i];
+  45   2         os_wait2(K_TMO,speed_delay);
+  46   2        }
+  47   1      }
+  48          //停止转动
+  49          void MotorStop(void){
+  50   1       MotorData=MotorData=(MotorData & 0xF0);
+  51   1      }
+  52          void loops_count(void){
+  53   1        motor_task_loop++;
+  54   1        if(motor_task_loop == 1000){
+C51 COMPILER V9.60.0.0   MOTOR                                                             06/29/2023 12:10:41 PAGE 2   
+
+  55   2          motor_task_loop = 0;
+  56   2        }
+  57   1         if(motor_task_loop % 31 == 0){
+  58   2          LED = P2 & led_speed[speed_choose];
+  59   2         }
+  60   1      }
+  61          void motor_speed_choose(void){
+  62   1        switch (speed_choose){
+  63   2              case 0:
+  64   2                speed_delay = 8;
+  65   2                break;
+  66   2              case 1:
+  67   2                speed_delay = 4;
+  68   2                break;
+  69   2              case 2:
+  70   2                speed_delay = 2;
+  71   2                break;
+  72   2              case 3:
+  73   2                speed_delay = 1;
+  74   2                break;
+  75   2        }
+  76   1      }
+  77          //主函数
+  78          void motor_control(void){
+  79   1        MotorCW();   //顺时针转动 
+  80   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    213    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     12       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

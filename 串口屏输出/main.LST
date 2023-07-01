@@ -1,0 +1,112 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/28/2023 10:25:16 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include <reg52.h>  
+   2           
+   3          #define uchar unsigned char  //宏定义 把unsigned char简写为uchar
+   4          #define uint unsigned int    //       把unsigned int 简写为uint
+   5            
+   6          uint  i,j;      //定义全局变量,执行电机for循环转动时间需要用到
+   7          
+   8          sbit A1 = P2^0;       //定义给步进电机四相连接的IO口
+   9          sbit B1 = P2^1;
+  10          sbit C1 = P2^2;
+  11          sbit D1 = P2^3;
+  12          
+  13          #define Coil_A {A1=1;B1=0;C1=0;D1=0;}     //A相通电，其它相断电
+  14          #define Coil_B {A1=0;B1=1;C1=0;D1=0;}     //B相通电，其它相断电
+  15          #define Coil_C {A1=0;B1=0;C1=1;D1=0;}     //C相通电，其它相断电
+  16          #define Coil_D {A1=0;B1=0;C1=0;D1=1;}     //D相通电，其它相断电
+  17          #define  Stop  {A1=0;B1=0;C1=0;D1=0;}     //全部断电，停止
+  18          
+  19          uchar Speed=2;      //整体调速，数字越小速度越快，而力矩也越小 
+  20          
+  21          void Delay(uint xms)  //延时函数 12.000MHz Delay(1)=1ms
+  22          {                       //延时程序 用烧录软件计算出来的 在另外一章有写
+  23   1         uchar i, j;
+  24   1         while(xms--) 
+  25   1        {
+  26   2        i = 2;
+  27   2        j = 239;
+  28   2        do { while (--j); }
+  29   2        while (--i);
+  30   2        }
+  31   1        
+  32   1      }
+  33          
+  34             void corotation(void)  //正转 子程序 A——D
+  35            {         
+  36   1           Coil_A 
+  37   1          P1 = P2;    
+  38   1           Delay(Speed);  
+  39   1           Coil_B
+  40   1          P1 = P2;  
+  41   1           Delay(Speed);
+  42   1           Coil_C
+  43   1          P1 = P2;  
+  44   1           Delay(Speed);
+  45   1           Coil_D
+  46   1          P1 = P2;  
+  47   1           Delay(Speed);
+  48   1        }
+  49            
+  50             void reversal(void)    //反转 子程序 D——A
+  51            {
+  52   1         Coil_D    
+  53   1      P1 = P2;      
+  54   1           Delay(Speed);  
+  55   1           Coil_C
+C51 COMPILER V9.60.0.0   MAIN                                                              06/28/2023 10:25:16 PAGE 2   
+
+  56   1          P1 = P2;  
+  57   1           Delay(Speed);
+  58   1           Coil_B
+  59   1          P1 = P2;  
+  60   1           Delay(Speed);
+  61   1           Coil_A
+  62   1          P1 = P2;  
+  63   1           Delay(Speed);
+  64   1        }
+  65            
+  66            
+  67             void main()        //主程序
+  68            {
+  69   1           Delay(30);    //启动前先缓冲一个30ms
+  70   1          
+  71   1            while(1)     //不断循环
+  72   1          { 
+  73   2               for(i=0;i<500;i++)    //正转1圈(大概位置，步进电机需要编码盘才能测得比较�
+             -�一点)
+  74   2             corotation();         //调用正转子函数
+  75   2        
+  76   2              Stop                 //停止
+  77   2            Delay(1000);         //延时1s
+  78   2                  
+  79   2             for(j=0;j<500;j++)    //反转1圈(大概位置)
+  80   2               reversal();           //调用反转子函数
+  81   2                
+  82   2            Stop                 //停止
+  83   2            Delay(1000);         //延时1s
+  84   2          }
+  85   1          
+  86   1        }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    211    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

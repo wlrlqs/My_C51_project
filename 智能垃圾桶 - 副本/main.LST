@@ -1,0 +1,504 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              12/02/2022 21:57:28 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include "timer2.h"
+   3          
+   4          #include "stepper_motor_5L4P.h"
+   5          #include "timer1.h"
+   6          
+   7          sbit wifi_open=P1^3;  //wifi打开标志位
+   8          sbit LED_RUN = P3^5;     //运行指示灯
+   9          sbit BEEP = P3^7;        //蜂鸣器
+  10          sbit ir_fill = P2^7;     //垃圾桶满不满检测传感器
+  11          sbit ir_hand = P2^6;     //人手检测
+  12          sbit ir_led = P1^0;      //垃圾桶状态指示灯
+  13          sbit key_hand = P1^1;   //手动打开关闭垃圾桶按键
+  14          
+  15          unsigned char flag_ir_hand_check = 0;            //红外检测标志位
+  16          unsigned char flag_trush_state_open_cloase = 0;   //垃圾桶状态
+  17          unsigned char flag_m_open_close = 0;   //手动打开或者关闭
+  18          unsigned char flag_fill = 0;
+  19          unsigned char flag_wifi=0;
+  20          
+  21          
+  22          void DelayMs(unsigned int i);
+  23          void SerialInit();
+  24          void SendByte(unsigned char sbyte);
+  25          void SendString(unsigned char *pstr);
+  26          void welcome_ui();
+  27          void open_ui();
+  28          void opened_ui();
+  29          void close_ui();
+  30          void closed_ui();
+  31          void fill_ui();
+  32          void delay(unsigned int i){  //延时函数
+  33   1        while(i--);
+  34   1      }
+  35          
+  36          void trash_open(){           //打开垃圾桶
+  37   1        stepper_init(ROT1_SEC2008*3, POSITIVE );
+  38   1      }
+  39          
+  40          void trash_close(){         //关闭垃圾桶
+  41   1        stepper_init(ROT1_SEC2008*3, INVERTION ); 
+  42   1      }
+  43          
+  44          unsigned char time_conuter = 0;  //垃圾桶关闭时间基准
+  45          void time_conter(){           //定时器中断函数
+  46   1        time_conuter++;
+  47   1        if(time_conuter > 200) time_conuter = 100;
+  48   1        LED_RUN = ~LED_RUN;
+  49   1        if(flag_fill == 1){
+  50   2          BEEP = !BEEP;
+  51   2        }else{
+  52   2          BEEP = 1;
+  53   2        }
+  54   1        
+  55   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              12/02/2022 21:57:28 PAGE 2   
+
+  56          void open_chose();
+  57          void close_chose();
+  58          void ir_hand_chose();
+  59          void hand_chose();
+  60          void fill_chose();
+  61          
+  62          
+  63          void main(){
+  64   1        SerialInit();
+  65   1        delay(500000);
+  66   1        SendString("DIR(1);\r\n");
+  67   1        delay(8000);
+  68   1        SendString("CLR(0);\r\n");
+  69   1        wifi_open=1;
+  70   1        DelayMs(2000);
+  71   1        welcome_ui();
+  72   1        timer2_start( 1000, time_conter);  //定时器初始化
+  73   1        BEEP = 0;   //蜂鸣器初始化
+  74   1        ir_led = 0;  //垃圾桶状态灯初始化
+  75   1        delay(50000);  //延时
+  76   1        delay(50000);
+  77   1        delay(50000);
+  78   1        delay(50000);
+  79   1        ir_fill=1;
+  80   1        while(1)  
+  81   1        {  
+  82   2      
+  83   2          fill_chose();
+  84   2          ir_hand_chose();
+  85   2          hand_chose();
+  86   2          open_chose();
+  87   2          fill_chose();
+  88   2          close_chose();
+  89   2          
+  90   2          
+  91   2        
+  92   2          
+  93   2        }
+  94   1        
+  95   1      }
+  96          void open_chose()
+  97          {
+  98   1      //垃圾桶打开判断
+  99   1          if( (flag_fill == 0 && flag_trush_state_open_cloase==0 && flag_ir_hand_check == 1) || (flag_fill == 1 &&
+             - flag_trush_state_open_cloase==0 && flag_m_open_close != 0) ||(wifi_open==0&&flag_trush_state_open_cloase==0)){
+ 100   2            flag_trush_state_open_cloase=1;
+ 101   2          if(wifi_open==0)
+ 102   2          {
+ 103   3            flag_wifi=1;
+ 104   3          }
+ 105   2            open_ui();
+ 106   2            trash_open();
+ 107   2            opened_ui();
+ 108   2            ir_led = 0;
+ 109   2            DelayMs(2000);
+ 110   2            fill_chose();
+ 111   2            welcome_ui();
+ 112   2            flag_m_open_close = 0;
+ 113   2          }
+ 114   1      }
+ 115          void close_chose()
+ 116          {
+C51 COMPILER V9.60.0.0   MAIN                                                              12/02/2022 21:57:28 PAGE 3   
+
+ 117   1      //垃圾桶关闭控制
+ 118   1          if(flag_trush_state_open_cloase==1&&flag_ir_hand_check==0&&wifi_open==1)
+ 119   1          {
+ 120   2            if(flag_wifi==0){
+ 121   3              DelayMs(5000);
+ 122   3            
+ 123   3            }
+ 124   2            close_ui();
+ 125   2            trash_close();
+ 126   2            closed_ui();
+ 127   2            DelayMs(2000);
+ 128   2            welcome_ui();
+ 129   2            ir_led = 1;
+ 130   2            flag_trush_state_open_cloase=0;
+ 131   2            flag_wifi=0;
+ 132   2          }
+ 133   1          ir_led = 0;
+ 134   1      }
+ 135          void fill_chose()//垃圾桶桶满检测
+ 136          {
+ 137   1      ir_fill = 1;
+ 138   1          if(ir_fill == 0){    //垃圾桶桶满检测
+ 139   2            delay(500);
+ 140   2            if(ir_fill == 0){
+ 141   3              flag_fill = 1;
+ 142   3              flag_ir_hand_check = 0;
+ 143   3            }
+ 144   2          }else{
+ 145   2            flag_fill = 0;
+ 146   2            ir_led = 0;
+ 147   2          }
+ 148   1          
+ 149   1          if(flag_fill ==1)
+ 150   1          {
+ 151   2            if(flag_trush_state_open_cloase==0)
+ 152   2            {
+ 153   3              open_ui();
+ 154   3              trash_open();
+ 155   3              opened_ui();
+ 156   3              flag_trush_state_open_cloase=1;
+ 157   3              
+ 158   3            }
+ 159   2            fill_ui();
+ 160   2            while(flag_fill ==1)
+ 161   2            {
+ 162   3              BEEP = !BEEP;
+ 163   3              LED_RUN = ~LED_RUN;
+ 164   3              DelayMs(500);
+ 165   3              LED_RUN = ~LED_RUN;
+ 166   3              if(ir_fill == 0){    //垃圾桶桶满检测
+ 167   4            delay(500);
+ 168   4            if(ir_fill == 0){
+ 169   5              flag_fill = 1;
+ 170   5              flag_ir_hand_check = 0;
+ 171   5            }
+ 172   4          }else{
+ 173   4            flag_fill = 0;
+ 174   4            ir_led = 0;
+ 175   4          }
+ 176   3            }
+ 177   2            BEEP = 1;
+ 178   2            DelayMs(3000);
+C51 COMPILER V9.60.0.0   MAIN                                                              12/02/2022 21:57:28 PAGE 4   
+
+ 179   2            if(flag_trush_state_open_cloase==1)
+ 180   2            {
+ 181   3              close_ui();
+ 182   3              trash_close();
+ 183   3              closed_ui();
+ 184   3              flag_trush_state_open_cloase=0;
+ 185   3              DelayMs(2000);
+ 186   3            }
+ 187   2            welcome_ui();
+ 188   2          
+ 189   2          }
+ 190   1          else
+ 191   1          {
+ 192   2            BEEP = 1;
+ 193   2          }
+ 194   1      }
+ 195          void ir_hand_chose()
+ 196          {
+ 197   1          ir_hand = 1;
+ 198   1          flag_ir_hand_check=0;
+ 199   1          if(ir_hand == 0){  //人手检测
+ 200   2            delay(500);
+ 201   2            if(ir_hand == 0){
+ 202   3              flag_ir_hand_check=1;
+ 203   3              while(ir_hand == 0);
+ 204   3              time_conuter = 0;
+ 205   3            }
+ 206   2          }
+ 207   1      }
+ 208          void hand_chose()
+ 209          {
+ 210   1          key_hand = 1;
+ 211   1          if(key_hand == 0){
+ 212   2            delay(500);
+ 213   2            if(key_hand == 0){
+ 214   3              flag_ir_hand_check=1;
+ 215   3              flag_m_open_close = 1;
+ 216   3              time_conuter = 0;
+ 217   3              while(key_hand == 0);
+ 218   3            }
+ 219   2          }
+ 220   1      }
+ 221          void welcome_ui()//显示欢迎ui界面
+ 222          {
+ 223   1        SendString("CLR(0);\r\n");
+ 224   1        delay(8000); 
+ 225   1        SendString("FSIMG(2097152,0,0,160,128,0);\r\n");
+ 226   1        delay(40000); 
+ 227   1        SendString("QRCODE(8,8,https://qm.qq.com/cgi-bin/qm/qr?k=Ns796uc8EysoG11g1VVrvomLXvHEUSsf&noverify=0#,100
+             -,0);\r\n");
+ 228   1        delay(40000); 
+ 229   1        SendString("DC16(12,64,'QQ名片',1);\r\n");
+ 230   1        delay(4000); 
+ 231   1        SendString("DC16(76,10,'欢迎使用',1);\r\n");
+ 232   1        delay(3000); 
+ 233   1        SendString("DC16(68,26,'智能垃圾桶',1);\r\n");
+ 234   1        delay(3000); 
+ 235   1        SendString("DC16(12,80,'制作:2100300317',1);\r\n");
+ 236   1        delay(3000); 
+ 237   1        SendString("DC16(12,96,'李期王申（shen）',1);\r\n");
+ 238   1        delay(3000); 
+ 239   1        
+C51 COMPILER V9.60.0.0   MAIN                                                              12/02/2022 21:57:28 PAGE 5   
+
+ 240   1      }
+ 241          void open_ui()//显示开盖ui
+ 242          {
+ 243   1        SendString("CLR(0);\r\n");
+ 244   1        delay(8000);  
+ 245   1        SendString("FSIMG(2097152,0,0,160,128,0);\r\n");
+ 246   1        delay(40000);  
+ 247   1        SendString("BOX(9,105,149,115,1);\r\n");//进度条边框
+ 248   1        delay(800);   
+ 249   1        SendString("DC16(9,88,'垃圾桶盖打开中',1);\r\n");
+ 250   1        delay(800);   
+ 251   1        DelayMs(700);
+ 252   1        SendString("BOX(16,28,35,66,1);\r\n");//垃圾桶打开第1块
+ 253   1        delay(800);  
+ 254   1        SendString("BOXF(9,105,25,115,1);\r\n");//进度条填充进度1
+ 255   1        delay(800); 
+ 256   1          SendString("DC16(9,88,'垃圾桶盖打开中*',1);\r\n");
+ 257   1        delay(800);   
+ 258   1        DelayMs(700);
+ 259   1        delay(800); 
+ 260   1        SendString("PL(51,28,51,66,1);\r\n");//垃圾桶打开第2块左竖线
+ 261   1        delay(800); 
+ 262   1        SendString("PL(70,66,70,28,1);\r\n");//垃圾桶打开第2块右竖线
+ 263   1        delay(800); 
+ 264   1        SendString("PL(70,66,51,66,1);\r\n");//垃圾桶打开第2块底横线
+ 265   1        delay(800);     
+ 266   1          SendString("PL(51,28,68,23,1);\r\n");   //垃圾桶打开第2块顶盖线
+ 267   1        delay(800); 
+ 268   1        SendString("BOXF(9,105,45,115,1);\r\n"); //进度条填充进度2
+ 269   1        delay(800); 
+ 270   1        SendString("DC16(9,88,'垃圾桶盖打开中*',1);\r\n");
+ 271   1        delay(800);   
+ 272   1        DelayMs(700);
+ 273   1        delay(800); 
+ 274   1        SendString("PL(86,28,86,66,1);\r\n");//垃圾桶打开第3块左竖线
+ 275   1        delay(800); 
+ 276   1        SendString("PL(105,66,105,28,1);\r\n");//垃圾桶打开第3块右竖线
+ 277   1        delay(800);  
+ 278   1        SendString("PL(86,66,105,66,1);\r\n");//垃圾桶打开第3块底横线
+ 279   1        delay(800);   
+ 280   1          SendString("PL(100,17,86,28,1);\r\n");//垃圾桶打开第3块顶盖线
+ 281   1        delay(800);  
+ 282   1        SendString("BOXF(9,105,75,115,1);\r\n"); //进度条填充进度3
+ 283   1        delay(800);  
+ 284   1        SendString("DC16(9,88,'垃圾桶盖打开中**',1);\r\n");
+ 285   1        delay(800);   
+ 286   1        DelayMs(700);  
+ 287   1        delay(800);   
+ 288   1          SendString("PL(122,28,122,66,1);\r\n");//垃圾桶打开第4块左竖线
+ 289   1        delay(800); 
+ 290   1        SendString("PL(141,28,141,66,1);\r\n");//垃圾桶打开第4块右竖线
+ 291   1        delay(800);  
+ 292   1        SendString("PL(122,66,141,66,1);\r\n");//垃圾桶打开第4块底横线
+ 293   1        delay(800); 
+ 294   1          SendString("PL(128,11,122,28,1);\r\n"); //垃圾桶打开第4块顶盖线
+ 295   1        delay(800);  
+ 296   1        SendString("BOXF(9,105,149,115,1);\r\n"); //进度条填充进度5
+ 297   1        delay(800);   
+ 298   1        SendString("DC16(9,88,'垃圾桶盖打开中***',1);\r\n");
+ 299   1        delay(800);   
+ 300   1        
+ 301   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              12/02/2022 21:57:28 PAGE 6   
+
+ 302          void opened_ui()
+ 303          {
+ 304   1        SendString("CLR(0);\r\n");
+ 305   1        delay(40000); 
+ 306   1        SendString("FSIMG(2097152,0,0,160,128,0);\r\n");
+ 307   1        delay(40000);
+ 308   1        SendString("DC16(9,88,'垃圾桶盖已成功打开*',1);\r\n");
+ 309   1        delay(800);
+ 310   1        SendString("BOXF(9,105,149,115,1);\r\n"); //进度条填充进度5
+ 311   1      }
+ 312          
+ 313          void close_ui()
+ 314          {
+ 315   1        SendString("CLR(0);\r\n");
+ 316   1        delay(8000); 
+ 317   1        SendString("FSIMG(2097152,0,0,160,128,0);\r\n");
+ 318   1        delay(40000); 
+ 319   1        SendString("BOX(9,105,149,115,1);\r\n");//进度条边框
+ 320   1        delay(800); 
+ 321   1        SendString("DC16(9,88,'垃圾桶盖关闭中',1);\r\n");
+ 322   1        delay(800); 
+ 323   1        DelayMs(700);
+ 324   1        SendString("PL(16,28,16,66,1);\r\n");//垃圾桶关闭第1块左竖线
+ 325   1        delay(800);
+ 326   1        SendString("PL(35,66,35,28,1);\r\n");//垃圾桶关闭第1块右竖线
+ 327   1        delay(800);
+ 328   1        SendString("PL(16,66,35,66,1);\r\n");//垃圾桶关闭第1块底横线
+ 329   1        delay(800);   
+ 330   1          SendString("PL(24,11,16,28,1);\r\n"); //垃圾桶关闭第1块顶盖线
+ 331   1        delay(800); 
+ 332   1        SendString("BOXF(9,105,25,115,1);\r\n");//进度条填充进度1
+ 333   1        delay(800);
+ 334   1          SendString("DC16(9,88,'垃圾桶盖关闭中*',1);\r\n");
+ 335   1        delay(800); 
+ 336   1        DelayMs(700);
+ 337   1        SendString("PL(51,28,51,66,1);\r\n");//垃圾桶关闭第2块左竖线
+ 338   1        delay(800);
+ 339   1        SendString("PL(70,66,70,28,1);\r\n");//垃圾桶关闭第2块右竖线
+ 340   1        delay(800);
+ 341   1        SendString("PL(70,66,51,66,1);\r\n");//垃圾桶关闭第2块底横线
+ 342   1        delay(800);   
+ 343   1          SendString("PL(66,17,51,28,1);\r\n");   //垃圾桶关闭第2块顶盖线
+ 344   1        delay(800);
+ 345   1        SendString("BOXF(9,105,45,115,1);\r\n"); //进度条填充进度2
+ 346   1        delay(800);
+ 347   1        SendString("DC16(9,88,'垃圾桶盖关闭中*',1);\r\n");
+ 348   1        delay(800); 
+ 349   1        DelayMs(700);
+ 350   1        SendString("PL(86,28,86,66,1);\r\n");//垃圾桶打开第3块左竖线
+ 351   1        delay(800);
+ 352   1        SendString("PL(105,66,105,28,1);\r\n");//垃圾桶打开第3块右竖线
+ 353   1        delay(800);
+ 354   1        SendString("PL(86,66,105,66,1);\r\n");//垃圾桶打开第3块底横线
+ 355   1        delay(800);   
+ 356   1          SendString("PL(100,23,86,28,1);\r\n");//垃圾桶打开第3块顶盖线
+ 357   1        delay(800);
+ 358   1        SendString("BOXF(9,105,75,115,1);\r\n"); //进度条填充进度3
+ 359   1        delay(800);
+ 360   1        SendString("DC16(9,88,'垃圾桶盖关闭中**',1);\r\n");
+ 361   1        delay(800); 
+ 362   1        DelayMs(700);   
+ 363   1          SendString("BOX(122,28,141,66,1);\r\n");//垃圾桶关闭4块
+C51 COMPILER V9.60.0.0   MAIN                                                              12/02/2022 21:57:28 PAGE 7   
+
+ 364   1        delay(800);
+ 365   1        SendString("BOXF(9,105,149,115,1);\r\n"); //进度条填充进度5
+ 366   1        delay(800); 
+ 367   1        SendString("DC16(9,88,'垃圾桶盖关闭中***',1);\r\n");
+ 368   1        delay(800);
+ 369   1      }
+ 370          void closed_ui()
+ 371          {
+ 372   1        SendString("CLR(0);\r\n");
+ 373   1        delay(20000); 
+ 374   1        SendString("FSIMG(2097152,0,0,160,128,0);\r\n");
+ 375   1        delay(20000);
+ 376   1        SendString("DC16(9,88,'垃圾桶盖已成功关闭*',1);\r\n");
+ 377   1        delay(800);
+ 378   1        SendString("BOXF(9,105,149,115,1);\r\n"); //进度条填充进度5
+ 379   1      }
+ 380          void fill_ui()
+ 381          {
+ 382   1        SendString("CLR(0);\r\n");
+ 383   1        delay(20000); 
+ 384   1        SendString("FSIMG(2097152,0,0,160,128,0);\r\n");
+ 385   1        delay(20000);
+ 386   1        SendString("DC24(20,40,'垃圾桶已满',14);\r\n");
+ 387   1        delay(800);
+ 388   1        SendString("DC16(9,88,'垃圾桶盖已强制打开',1);\r\n");
+ 389   1        delay(800);
+ 390   1        SendString("BOXF(9,105,149,115,1);\r\n"); //进度条填充进度5
+ 391   1      }
+ 392          /*
+ 393          //单片机时钟周期:11.0592MHz   以时钟1作为波特率发生器
+ 394          void SerialInit(){
+ 395           TMOD=0x20;   //设置T1工作方式为方式2
+ 396           TH1=0xfd; //给定时器高位装初值
+ 397           TL1=0xfd; //给定时器低位装初值
+ 398           TR1=1;  //开定时器
+ 399                       //以上是设置波特率
+ 400           SM0=0;  //设置串口通讯方式为方式1
+ 401           SM1=1;  
+ 402           REN=1;  //串口是否接收数据的开关
+ 403          
+ 404           EA=1; //总中断打开,采用查询法时不用打开中断
+ 405           ES=1; //串口中断开关,采用查询法时不用打开中断
+ 406          }
+ 407          */
+ 408          //单片机时钟周期:11.0592MHz    以时钟T2作为波特率发生器
+ 409          void SerialInit(){
+ 410   1          PCON &= 0x7F; //波特率不倍速
+ 411   1          SCON = 0x50;  //8位数据,可变波特率
+ 412   1          AUXR |= 0x40; //定时器1时钟为Fosc,即1T
+*** ERROR C202 IN LINE 412 OF main.c: 'AUXR': undefined identifier
+ 413   1          AUXR &= 0xFE; //串口1选择定时器1为波特率发生器
+*** ERROR C202 IN LINE 413 OF main.c: 'AUXR': undefined identifier
+ 414   1          TMOD &= 0x0F; //清除定时器1模式位
+ 415   1          TMOD |= 0x20; //设定定时器1为8位自动重装方式
+ 416   1          TL1 = 0xFD;   //设定定时初值
+ 417   1          TH1 = 0xFD;   //设定定时器重装值
+ 418   1          ET1 = 0;      //禁止定时器1中断
+ 419   1          TR1 = 1;      //启动定时器1
+ 420   1       
+ 421   1          REN = 1; //不开启这个无法接受数据
+ 422   1          ES = 1;  //开启串口中断使能
+ 423   1          EA = 1;
+C51 COMPILER V9.60.0.0   MAIN                                                              12/02/2022 21:57:28 PAGE 8   
+
+ 424   1          TI = 0;
+ 425   1          RI = 0;       //串口中断开关,采用查询法时不用打开中断
+ 426   1      
+ 427   1      }
+ 428          
+ 429          
+ 430          //串口中断函数:
+ 431          void SerialPortInte(void) interrupt 4 //采用串口中断法收发数据
+ 432          {
+ 433   1         unsigned char rbyte;
+ 434   1         if(RI){     //RI=1,判定为串口接收到了数据，RI要清零，
+ 435   2               RI=0;
+ 436   2           rbyte=SBUF; 
+ 437   2           if(rbyte==0x0A){     
+ 438   3              SendString("");
+ 439   3           }else if(rbyte==0x0D){
+ 440   3            SendString("");
+ 441   3           }else{
+ 442   3            SendByte(rbyte); 
+ 443   3           }
+ 444   2            
+ 445   2           }
+ 446   1      
+ 447   1      }
+ 448          
+ 449          //串口发送一个字节:
+ 450          void SendByte(unsigned char sbyte)
+ 451          { 
+ 452   1           SBUF=sbyte; //发送数据
+ 453   1           while(!TI); //等待发送完成
+ 454   1           TI=0; //清零发送标志位
+ 455   1      }
+ 456           
+ 457          //串口发送一个字符串:
+ 458          void SendString(unsigned char *pstr) //定义指针
+ 459          {
+ 460   1           while(*pstr!='\0') //字符串是否发完
+ 461   1           {
+ 462   2               SendByte(*pstr);//发送字符串数据
+ 463   2               pstr++; //指向下一个字符
+ 464   2           }
+ 465   1      }
+ 466          
+ 467          void DelayMs(unsigned int i)  //延时i ms
+ 468          {
+ 469   1          unsigned int j;
+ 470   1          while(i--)
+ 471   1          {
+ 472   2              for(j = 0; j < 125; j++);
+ 473   2          }
+ 474   1      }
+ 475          
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  2 ERROR(S)

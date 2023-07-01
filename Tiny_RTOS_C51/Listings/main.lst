@@ -1,0 +1,169 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/25/2023 22:11:26 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE Application\main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT
+                    -(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          ///************************************************************************************
+   2          //*  Copyright (c), 2013, HelTec Automatic Technology co.,LTD.
+   3          //*            All rights reserved.
+   4          //*
+   5          //* Http:    www.heltec.cn
+   6          //* Email:   cn.heltec@gmail.com
+   7          //* WebShop: heltec.taobao.com
+   8          //*
+   9          //* File name: OLED12864.c
+  10          //* Project  : OLED
+  11          //* Processor: STC89C52
+  12          //* Compiler : Keil C51 Compiler
+  13          //* 
+  14          //* Author : Ð¡ÁÖ
+  15          //* Version: 1.00
+  16          //* Date   : 2013.8.8
+  17          //* Email  : hello14blog@gmail.com
+  18          //* Modification: none
+  19          //* 
+  20          //* Description: 128*64µãÕûOLEDÄ£¿é¹¦ÄÜÑÝÊ¾³ÌÐòµÄÖ÷º¯Êý£¬½öÊÊÓÃheltec.taobao.comËùÊÛ²úÆ·
+  21          //*
+  22          //* Others: none;
+  23          //*
+  24          //* Function List:
+  25          //*
+  26          //* 1. void delay(unsigned int z) -- Ö÷º¯ÊýÖÐÓÃÓÚµ÷ÕûÏÔÊ¾Ð§¹ûµÄÑÓÊ±º¯Êý,STC89C52 12MHZ z=1Ê±´óÔ¼ÑÓÊ±1ms,Æä
+             -ËûÆµÂÊÐèÒª×Ô¼º¼ÆËã
+  27          //* 2. void main(void) -- Ö÷º¯Êý
+  28          //*
+  29          //* History: none;
+  30          //*×¢ÒâËµÃ÷£ºCS½ÅÐèÒª½ÓµØ
+  31          //*************************************************************************************/
+  32          
+  33          //#include<reg52.h>
+  34          //#include "intrins.h"
+  35          //#include "codetab.h"
+  36          //#include "LQ12864.h"
+  37          
+  38          //void main(void)
+  39          //{
+  40          //  unsigned char i;
+  41          
+  42          //  OLED_Init(); //OLED³õÊ¼»¯
+  43          //  while(1)
+  44          //  {
+  45          ////    OLED_Fill(0xff); //ÆÁÈ«ÁÁ
+  46          ////    delay(2000);
+  47          ////    OLED_Fill(0x00); //ÆÁÈ«Ãð
+  48          ////    delay(200);
+  49          //    OLED_P16x16Ch(24,0,1);
+  50          //    OLED_P16x16Ch(40,0,2);
+  51          //    OLED_P16x16Ch(57,0,3);
+  52          //    OLED_P16x16Ch(74,0,4);
+  53          //    OLED_P16x16Ch(91,0,5);
+C51 COMPILER V9.60.0.0   MAIN                                                              06/25/2023 22:11:26 PAGE 2   
+
+  54          //    for(i=0; i<8; i++)//Í¨¹ýµãÕûÏÔÊ¾ºº×Ö -- i±íÊ¾×Ö±íÊý×éµÄÎ»ÖÃ
+  55          //    {
+  56          ////      OLED_P16x16Ch(i*16,0,i);
+  57          //      OLED_P16x16Ch(i*16,2,i+8);
+  58          //      OLED_P16x16Ch(i*16,4,i+16);
+  59          //      OLED_P16x16Ch(i*16,6,i+24);
+  60          //    }
+  61          //    delay(4000);
+  62          //    OLED_CLS();//ÇåÆÁ
+  63          
+  64          //    OLED_P8x16Str(0,0,"HelTec");//µÚÒ»ÐÐ -- 8x16µÄÏÔÊ¾µ¥ÔªÏÔÊ¾ASCIIÂë
+  65          //    OLED_P8x16Str(0,2,"OLED Display");
+  66          //    OLED_P8x16Str(0,4,"www.heltec.cn");
+  67          //    OLED_P6x8Str(0,6,"cn.heltec@gmail.com");
+  68          //    OLED_P6x8Str(0,7,"heltec.taobao.com");
+  69          //    delay(4000);
+  70          //    OLED_CLS();
+  71          
+  72          //    Draw_BMP(0,0,128,8,BMP1);  //Í¼Æ¬ÏÔÊ¾(Í¼Æ¬ÏÔÊ¾É÷ÓÃ£¬Éú³ÉµÄ×Ö±í½Ï´ó£¬»áÕ¼ÓÃ½Ï¶à¿Õ¼ä£¬FLASH¿Õ¼ä8KÒÔÏÂÉ÷Ó
+             -Ã)
+  73          //    delay(8000);
+  74          //    Draw_BMP(0,0,128,8,BMP2);
+  75          //    delay(8000);
+  76          //  }
+  77          //}
+  78          #include "RTX51TNY.h"
+  79          #include "reg52.h"
+  80          sbit led0=P1^0;
+  81          sbit led1=P1^1;
+  82          /***************************************
+  83          * º¯ Êý Ãû       : task_create
+  84          * º¯Êý¹¦ÄÜ     : ÈÎÎñ0
+  85          * Êä    Èë       : ÎÞ
+  86          * Êä    ³ö      : ÎÞ
+  87          ****************************************/
+  88          void task_create(void) _task_ 0
+  89          {
+  90   1       os_create_task(1);
+  91   1       os_create_task(2);
+  92   1       os_delete_task(0);
+  93   1       while(1)
+  94   1       {
+  95   2        ;
+  96   2       }  
+  97   1      }
+  98          /*****************************************
+  99          * º¯ Êý Ãû       : task_1
+ 100          * º¯Êý¹¦ÄÜ     : ÈÎÎñ1
+ 101          * Êä    Èë       : ÎÞ
+ 102          * Êä    ³ö      : ÎÞ
+ 103          ******************************************/
+ 104          void task_1(void) _task_ 1
+ 105          {
+ 106   1       while(1)
+ 107   1       {
+ 108   2        led0=!led0;
+ 109   2        os_send_signal(2);
+ 110   2        os_wait2(K_IVL,250);
+ 111   2        os_wait2(K_IVL,250);
+ 112   2       }  
+ 113   1      }
+ 114          
+C51 COMPILER V9.60.0.0   MAIN                                                              06/25/2023 22:11:26 PAGE 3   
+
+ 115          /*******************************************
+ 116          * º¯ Êý Ãû       : task_2
+ 117          * º¯Êý¹¦ÄÜ     : ÈÎÎñ2
+ 118          * Êä    Èë       : ÎÞ
+ 119          * Êä    ³ö      : ÎÞ
+ 120          *******************************************/
+ 121          void task_2(void) _task_ 2
+ 122          {
+ 123   1       unsigned char sig;
+ 124   1       while(1)
+ 125   1       {
+ 126   2        
+ 127   2      
+ 128   2        sig=os_wait2(K_SIG|K_IVL,10);
+ 129   2        os_reset_interval(10);
+ 130   2        if(sig==SIG_EVENT)
+ 131   2        {
+ 132   3         led1=0;
+ 133   3        }else
+ 134   2        {
+ 135   3         led1=1;
+ 136   3        }
+ 137   2        os_wait2(K_IVL,100);
+ 138   2       }  
+ 139   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     75    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,39 @@
+C51 COMPILER V9.57.0.0   XJ                                                                06/27/2022 19:04:50 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE XJ
+OBJECT MODULE PLACED IN .\Objects\xj.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE xj.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\xj.lst
+                    -) TABS(2) OBJECT(.\Objects\xj.obj)
+
+line level    source
+
+   1          #include <REG52.H>
+   2          #include "CheLun.h"
+   3          #include "RED.h"
+   4          #include "HR_SC.h"
+   5          extern unsigned char pwm_val_left;
+   6          extern unsigned char pwm_val_right;
+   7          
+   8          void xj()
+   9          {
+  10   1        Init_Timer0();
+  11   1        while(1)
+  12   1        {
+  13   2          xj_Run(); 
+  14   2        }
+  15   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      8    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
